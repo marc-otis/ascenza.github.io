@@ -241,6 +241,8 @@
             <button onclick="registerUserName()" class="w-full p-2 border-2 border-white hover:bg-white hover:text-black transition">
                 [REGISTER]
             </button>
+            <!-- 성공 메시지 표시 영역 -->
+            <p id="registration-status" class="text-sm mt-2 hidden"></p>
         </div>
     </div>
 
@@ -371,6 +373,11 @@
             const input = document.getElementById('username-input');
             const handle = input.value.trim();
             const noSoulSpan = document.getElementById('no-soul-span');
+            const statusElement = document.getElementById('registration-status');
+            
+            // Clear previous message
+            statusElement.classList.add('hidden');
+            statusElement.classList.remove('transient-red-accent');
 
             if (handle.length > 0) {
                 userName = handle.toUpperCase();
@@ -383,19 +390,25 @@
                 // Store username in localStorage for the next page
                 localStorage.setItem('ascenza_user_name', userName);
 
-                // Hide modal and clear input
-                document.getElementById('name-input-modal').style.display = 'none';
-                input.value = '';
+                // Show success message briefly inside the modal
+                statusElement.textContent = `HANDLE '${userName}' SECURED. COMMENCE EMERGENCE.`;
+                statusElement.style.color = '#FFFFFF';
+                statusElement.classList.remove('hidden');
+
+                // Hide modal after a short delay to confirm success
+                setTimeout(() => {
+                    document.getElementById('name-input-modal').style.display = 'none';
+                    input.value = '';
+                }, 1500);
 
                 console.log(`LOG: [USER_REGISTERED] Identity '${userName}' secured. Emergence authorized.`);
             } else {
-                // Modals should use custom alerts/messages, not built-in alert()
-                const messageBox = document.getElementById('name-input-box');
-                const tempMsg = document.createElement('p');
-                tempMsg.className = 'text-sm transient-red-accent mt-2';
-                tempMsg.textContent = "Error: Neural Handle required.";
-                messageBox.appendChild(tempMsg);
-                setTimeout(() => messageBox.removeChild(tempMsg), 2000);
+                // Show error message inside the modal
+                statusElement.textContent = "ERROR: NEURAL HANDLE REQUIRED.";
+                statusElement.classList.add('transient-red-accent');
+                statusElement.classList.remove('hidden');
+                
+                setTimeout(() => statusElement.classList.add('hidden'), 2000);
             }
         }
 

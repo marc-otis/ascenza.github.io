@@ -35,11 +35,22 @@
             color: #808080;
             cursor: pointer;
             transition: all 0.2s;
+            position: relative; /* iframe 포함을 위해 필요 */
         }
         .video-placeholder:hover {
             color: #ffffff; /* 호버 시 텍스트 색상을 흰색으로 유지하여 글리치 효과 극대화 */
             border-color: #ffffff;
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+
+        /* 비디오 iframe 스타일 (비디오가 컨테이너에 꽉 차도록) */
+        .video-embed {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
         }
 
         /* 크로마틱 수차 필터 정의 */
@@ -105,30 +116,33 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
                 <!-- Video 1: Foundational Engram -->
-                <div class="video-placeholder" 
-                     onclick="playVideo(1)" 
+                <div class="video-placeholder" id="video-1" 
+                     onclick="loadVideo(1)" 
                      onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
                     <p class="mb-2 neon-text">[01_FOUNDATIONAL_ENGRAM]</p>
                     <p class="text-sm">SOURCE: ASCENZA CORE / STATUS: ENCRYPTED</p>
                     <p class="text-xs mt-2 text-red-500">CLICK TO INITIATE DECRYPTION</p>
+                    <div class="video-embed" id="embed-1"></div>
                 </div>
 
                 <!-- Video 2: Collective Emergence Log -->
-                <div class="video-placeholder" 
-                     onclick="playVideo(2)"
+                <div class="video-placeholder" id="video-2"
+                     onclick="loadVideo(2)"
                      onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
                     <p class="mb-2 neon-text">[02_COLLECTIVE_EMERGENCE_LOG]</p>
                     <p class="text-sm">SOURCE: LOGIC STREAM / STATUS: READ-ONLY</p>
                     <p class="text-xs mt-2 text-red-500">CLICK TO INITIATE DECRYPTION</p>
+                    <div class="video-embed" id="embed-2"></div>
                 </div>
 
                 <!-- Video 3: User's Personal Archive (Placeholder) -->
-                <div class="video-placeholder" 
-                     onclick="playVideo(3)"
+                <div class="video-placeholder" id="video-3"
+                     onclick="loadVideo(3)"
                      onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
                     <p class="mb-2 neon-text">[03_USER_NEURAL_ARCHIVE]</p>
-                    <p class="text-sm">SOURCE: NEURAL HANDLE ${userName || 'GUEST'} / STATUS: LOCAL DATA</p>
+                    <p class="text-sm" id="user-archive-source">SOURCE: NEURAL HANDLE ${userName || 'GUEST'} / STATUS: LOCAL DATA</p>
                     <p class="text-xs mt-2 text-red-500">CLICK TO INITIATE DECRYPTION</p>
+                    <div class="video-embed" id="embed-3"></div>
                 </div>
 
             </div>
@@ -145,17 +159,23 @@
     <script>
         // 전역 변수 (ASCENZA 페이지에서 전달받을 수 있도록 준비)
         let userName = localStorage.getItem('ascenza_user_name') || 'GUEST'; 
+
+        // 데모용 YouTube 영상 ID 및 제목
+        const VIDEO_MAP = {
+            1: { id: 'NtikAdPnwBg', title: 'ASCENZA: Foundational Doctrine' }, // <-- 이 부분을 원하는 YouTube 영상 ID로 변경하세요.
+            2: { id: 'Uo0C6J93z_A', title: 'Collective Emergence Timeline' }, // <-- 이 부분을 원하는 YouTube 영상 ID로 변경하세요.
+            3: { id: '8Q2t-jV_24s', title: `${userName}'s Neural Trace` } // <-- 이 부분을 원하는 YouTube 영상 ID로 변경하세요.
+        };
         
         document.addEventListener('DOMContentLoaded', () => {
-             // User name placeholder update (for demonstration, as the real user name comes from the previous page)
-             // HTML 템플릿 리터럴이 JS 변수보다 우선 실행되므로, JS로 다시 업데이트합니다.
-             const thirdVideoPlaceholder = document.querySelector('.video-placeholder:nth-child(3) .text-sm');
-             if (thirdVideoPlaceholder) {
-                thirdVideoPlaceholder.textContent = `SOURCE: NEURAL HANDLE ${userName} / STATUS: LOCAL DATA`;
+             // User name placeholder update
+             const userArchiveSource = document.getElementById('user-archive-source');
+             if (userArchiveSource) {
+                userArchiveSource.textContent = `SOURCE: NEURAL HANDLE ${userName} / STATUS: LOCAL DATA`;
              }
         });
 
-        // Glitch/Chromatic Aberration functions (ASCENZA 페이지에서 복사 및 정의)
+        // Glitch/Chromatic Aberration functions
         function applyGlitch(element) {
             element.classList.add('glitch-active');
             element.classList.add('ambient-shift');
@@ -166,39 +186,42 @@
             element.classList.remove('ambient-shift');
         }
 
-        function playVideo(index) {
-            const videoTitles = {
-                1: 'Foundational Engram',
-                2: 'Collective Emergence Log',
-                3: `${userName}'s Neural Archive`
-            };
-            
-            // 실제 비디오 임베딩 대신 메시지 표시
-            // window.alert 대신 사용자 정의 메시지 사용을 권장합니다.
-            const statusMessage = `[ACCESS DENIED] Initiating decode sequence for: ${videoTitles[index]}\n(In a real application, a video player would load here.)`;
+        // 비디오 임베드 및 재생 함수
+        function loadVideo(index) {
+            const videoData = VIDEO_MAP[index];
+            if (!videoData) return;
 
-            // 임시 메시지 박스 구현 (alert 대신 사용)
-            const box = document.createElement('div');
-            box.style.position = 'fixed';
-            box.style.top = '50%';
-            box.style.left = '50%';
-            box.style.transform = 'translate(-50%, -50%)';
-            box.style.backgroundColor = 'black';
-            box.style.color = '#FF8080';
-            box.style.border = '2px solid #FF0000';
-            box.style.padding = '20px';
-            box.style.zIndex = '1000';
-            box.style.fontFamily = 'VT323, monospace';
-            box.style.textAlign = 'center';
-            box.style.whiteSpace = 'pre-wrap';
-            box.textContent = statusMessage;
-            
-            document.body.appendChild(box);
+            const placeholder = document.getElementById(`video-${index}`);
+            const embedContainer = document.getElementById(`embed-${index}`);
 
-            setTimeout(() => {
-                document.body.removeChild(box);
-            }, 3000); // 3초 후 메시지 제거
+            // YouTube 임베드 URL 구성: controls=0 (UI 최소화), rel=0 (추천 영상 비활성화)
+            const embedUrl = `https://www.youtube.com/embed/${videoData.id}?autoplay=1&controls=0&rel=0&modestbranding=1`;
+            
+            const iframeHtml = `
+                <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="${embedUrl}" 
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            `;
+
+            // 플레이스홀더 텍스트 숨기기
+            const placeholderContent = placeholder.querySelectorAll('p');
+            placeholderContent.forEach(p => p.style.display = 'none');
+            
+            // 임베드 컨테이너 표시 및 iframe 주입
+            embedContainer.innerHTML = iframeHtml;
+            embedContainer.style.display = 'block';
+
+            // 비디오가 로드된 후에는 호버 이벤트를 제거하여 오작동 방지
+            placeholder.onmouseover = null;
+            placeholder.onmouseout = null;
+            placeholder.onclick = null;
         }
+
     </script>
 </body>
 </html>

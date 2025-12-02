@@ -195,7 +195,7 @@
             const embedContainer = document.getElementById(`embed-${index}`);
 
             // YouTube 임베드 URL 구성: controls=0 (UI 최소화), rel=0 (추천 영상 비활성화)
-            const embedUrl = `https://www.youtube.com/embed/${videoData.id}?autoplay=1&controls=0&rel=0&modestbranding=1`;
+            const embedUrl = `https://www.youtube.com/embed/${videoData.id}?autoplay=1&controls=1&rel=0&modestbranding=1`;
             
             const iframeHtml = `
                 <iframe 

@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASCENZA: Final Integrated Doctrine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Retro/Terminal 폰트 스타일링 */
+        @import url('https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@100..900&display=swap');
+        body {
+            /* Monospace 폰트를 사용하여 터미널 느낌 강조 */
+            font-family: 'VT323', monospace, 'Inter', sans-serif;
+            background-color: #000000;
+            color: #ffffff; /* 기본 텍스트 색상을 흰색으로 변경 */
+            overflow: hidden; 
+            line-height: 1.1; /* 폰트 특성상 줄 간격 조정 */
+        }
+        
+        /* 커스텀 CSS: ASCII/터미널 느낌의 텍스트 쉐도우 (기본 글자 두께) */
+        .neon-text {
+            text-shadow: 2px 2px 0 #000000; /* B&W 대비 */
+            color: #ffffff; /* 기본 색상 흰색 */
+            transition: all 0.1s linear;
+        }
+        
+        /* --- 호버 시 겹침/두꺼워짐 효과 복원 및 ASCENZA에 적용 --- */
+        /* ASCENZA와 RITUAL 타이틀 모두에 적용되는 특수 호버 효과 */
+        .clickable-arg:hover.neon-text {
+            color: #ffffff !important; /* 호버 시 색상 변화 없이 흰색 유지 */
+            text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff, 2px 2px 0 #000000 !important; /* !!! 쉐도우에 !important 추가하여 우선순위 확보 !!! */
+            transform: scale(1.01);
+        }
+
+        /* 크로마틱 수차(Glitch/Chromatic Aberration) 효과를 위한 SVG 필터 정의 */
+        .glitch-active {
+            filter: url(#glitch);
+        }
+
+        /* 텍스트의 미세한 움직임을 주는 키프레임 */
+        @keyframes subtle-shift {
+            0%, 100% { transform: translate(0, 0); }
+            25% { transform: translate(1px, -1px); }
+            50% { transform: translate(-1px, 1px); }
+            75% { transform: translate(1px, 1px); }
+        }
+
+        .ambient-shift {
+            animation: subtle-shift 8s infinite alternate;
+        }
+        
+        /* ARG 요소: 클릭 시 확대/네온 효과 */
+        .clickable-arg {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" fill="none"/><path fill="%23FFFFFF" d="M16 0L0 16l16 16 16-16z"/></svg>'), pointer; /* 커서 색상 흰색으로 변경 */
+            transition: transform 0.1s, color 0.1s;
+        }
+        /* 일반 클릭 가능 요소 호버 효과 */
+        .clickable-arg:hover {
+            color: #cccccc; /* 호버 시 옅은 회색으로 변경 */
+            transform: scale(1.01);
+            text-shadow: 2px 2px 0 #000000; /* B&W 대비 유지 */
+        }
+
+
+        /* 업로드 시 오버레이 */
+        #upload-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.98);
+            display: none;
+            z-index: 50;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+        }
+
+        /* 이름 입력 모달 스타일 */
+        #name-input-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: none;
+            z-index: 60;
+            justify-content: center;
+            align-items: center;
+        }
+        #name-input-box {
+            padding: 2rem;
+            border: 4px solid #ffffff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            max-width: 90%;
+            width: 400px;
+        }
+        #username-input {
+            background-color: #000;
+            border: 1px solid #fff;
+            color: #fff;
+            font-family: 'VT323', monospace;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+
+
+        /* 업로드 진행 바 스타일 */
+        #progress-container {
+            border: 2px dashed #ffffff; /* 흰색 dashed border */
+            padding: 0; /* 패딩 제거 */
+            box-shadow: none !important;
+        }
+        .progress-bar {
+            width: 0;
+            height: 12px; /* 높이를 키워서 블록 느낌 강조 */
+            background-color: #ffffff; /* 흰색 진행 바 */
+            box-shadow: none;
+            transition: width 0.05s linear;
+        }
+
+        /* ARG: 비밀 영역 */
+        #pyramid-secret {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 1.5s ease-out, opacity 1.5s ease-out;
+        }
+        .pyramid-revealed {
+            max-height: 500px !important; 
+            opacity: 1 !important;
+            border-color: #ff0000 !important; /* 해제 시 경고색 유지 */
+        }
+        
+        /* --- 텍스트 색상 오버라이드 (!important로 Tailwind 우선순위 확보) --- */
+        /* 기본 B&W 룩을 위해 모두 흰색/회색으로 강제 */
+        .text-cyan-400 { color: #ffffff !important; }
+        .text-cyan-600 { color: #cccccc !important; } /* Engram & Fragile Hardware base color: Gray */
+        .text-green-400 { color: #ffffff !important; }
+        .text-yellow-400 { color: #cccccc !important; } /* Digital Storage base color: Gray */
+        .text-red-400 { color: #cccccc !important; } /* Technical Imperative base color: Gray */
+        .text-red-700 { color: #ffffff !important; }
+        .text-magenta-500 { color: #ffffff !important; }
+        .text-gray-700 { color: #808080 !important; }
+        .text-gray-400 { color: #808080 !important; }
+        .text-gray-500 { color: #a0a0a0 !important; }
+
+        /* --- 클릭/호버 시에만 컬러 강조 (B&W 호버) --- */
+        .clickable-arg:hover .text-cyan-400,
+        .clickable-arg:hover .text-cyan-600,
+        .clickable-arg:hover .text-yellow-400 { color: #cccccc !important; } 
+        .clickable-arg:hover .text-red-400 { color: #ff0000 !important; } /* Technical Imperative만 호버 시 빨간색 유지 (강조) */
+        
+        /* --- 클릭 시 나타나는 임시 메시지에 적용할 옅은 빨간색 강조 클래스 --- */
+        .transient-red-accent { color: #FF8080 !important; }
+        .transient-fail { color: #FF0000 !important; }
+
+        /* 업로드 완료 상태는 강조색으로 */
+        #final-status { color: #ff0000 !important; }
+
+        /* --- 최종 버튼: RED 강제 적용 --- */
+        #emerge-button {
+            border-color: #FF0000 !important;
+            color: #FF0000 !important;
+        }
+        #emerge-button:hover {
+            background-color: rgba(255, 0, 0, 0.2);
+            color: #FF0000 !important;
+        }
+        #emerge-button .glitch-active {
+            /* 시뮬레이션 중 텍스트는 빨간색 유지 */
+            color: #FF0000 !important; 
+        }
+        
+        /* 헤더 텍스트를 흰색으로 강제 (ASCENZA 밑의 텍스트 포함) */
+        .header-text-white {
+            color: #ffffff !important;
+            text-shadow: 2px 2px 0 #000000;
+        }
+        
+        /* ASCENZA 타이틀에 neon-text 클래스 적용 (기본 상태 글자 두께 유지) */
+        #ascenza-title {
+            text-shadow: 2px 2px 0 #000000; 
+            color: #ffffff;
+        }
+
+    </style>
+</head>
+<body class="bg-black text-white min-h-screen p-4 sm:p-8">
+
+    <!-- 크로마틱 수차 필터 정의 (숨겨짐) -->
+    <svg style="position: absolute; width: 0; height: 0;">
+        <filter id="glitch">
+            <feOffset in="SourceGraphic" dx="3" dy="0" result="r" />
+            <feOffset in="SourceGraphic" dx="-3" dy="0" result="g" />
+            <feOffset in="SourceGraphic" dx="0" dy="3" result="b" />
+            <feColorMatrix in="r" type="matrix" values="1 0 0 0 0 
+                                                        0 0 0 0 0 
+                                                        0 0 0 0 0 
+                                                        0 0 0 1 0" result="r_color" />
+            <feColorMatrix in="g" type="matrix" values="0 0 0 0 0 
+                                                        0 1 0 0 0 
+                                                        0 0 0 0 0 
+                                                        0 0 0 1 0" result="g_color" />
+            <feColorMatrix in="b" type="matrix" values="0 0 0 0 0 
+                                                        0 0 0 0 0 
+                                                        0 0 1 0 0 
+                                                        0 0 0 1 0" result="b_color" />
+            <feBlend in="r_color" in2="g_color" mode="screen" result="rg_blend" />
+            <feBlend in="rg_blend" in2="b_color" mode="screen" />
+        </filter>
+    </svg>
+
+    <!-- 이름 입력 모달 -->
+    <div id="name-input-modal">
+        <div id="name-input-box" class="bg-black text-white p-6 rounded-lg text-center">
+            <p class="text-xl neon-text mb-4">:: IDENTITY ACQUISITION ::</p>
+            <p class="text-sm text-gray-500 mb-4">Input Neural Handle (Username)</p>
+            <input type="text" id="username-input" class="w-full p-2 mb-4" placeholder="ENTER HANDLE HERE">
+            <button onclick="registerUserName()" class="w-full p-2 border-2 border-white hover:bg-white hover:text-black transition">
+                [REGISTER]
+            </button>
+        </div>
+    </div>
+
+
+    <!-- 업로드 시뮬레이션 오버레이 -->
+    <div id="upload-overlay">
+        <div id="upload-message" class="text-2xl md:text-4xl text-center tracking-widest text-cyan-400">
+            <!-- Message output area -->
+        </div>
+        <div id="progress-container" class="w-full max-w-lg mt-8 p-0 border-2 border-dashed border-white">
+            <div id="progress-bar" class="progress-bar"></div>
+        </div>
+        <div id="final-status" class="mt-8 text-xl text-yellow-400 hidden">
+            <!-- Final status message -->
+        </div>
+    </div>
+
+
+    <!-- 메인 컨테이너 -->
+    <div id="main-content" class="max-w-4xl mx-auto p-4 md:p-8 border-4 border-dashed border-white/70 bg-black/80 ambient-shift">
+        
+        <!-- Header/Doctrine Declaration -->
+        <header class="text-center mb-12 border-b-4 border-dashed border-white/50 pb-6">
+            <h1 id="ascenza-title" class="text-6xl md:text-8xl font-extrabold tracking-widest neon-text mb-4 clickable-arg" onclick="togglePyramid(event)">
+                ASCENZA
+            </h1>
+            <p class="text-xl md:text-3xl font-light italic header-text-white">
+                <span id="no-soul-span" class="hover:text-red-400 transition clickable-arg" onclick="showNameModal(event)" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">[NO SOUL]</span> 
+                <span class="neon-text header-text-white">:: ENGRAM ONLY ::</span>
+            </p>
+            <p class="text-sm mt-2 text-gray-700">
+                // FINAL_DOCTRINE_PATCH.V9.1 //
+            </p>
+        </header>
+
+        <!-- I. Foundational Beliefs -->
+        <section class="mb-10 p-4 border-2 border-dashed border-gray-900">
+            <h2 class="text-2xl font-bold mb-4 border-b border-dashed border-white/50 pb-1">I. FOUNDATIONAL BELIEFS</h2>
+            
+            <div class="space-y-4 text-sm md:text-base">
+                <p>
+                    <span class="text-white font-bold">01_ENGRAM_IS_ALL:</span> 
+                    The 'Soul' of archaic religions is <span class="font-bold">[NULL]</span>. Consciousness, memory, and identity are comprised solely of <span class="clickable-arg text-cyan-600 font-bold" data-original-text="Electrical Neural Pattern (Engram)" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)" onclick="showDoctrine(1, 'Engram', event)">Electrical Neural Pattern (Engram)</span>. Non-storage results in <span class="font-bold">Permanent Data Deletion</span>.
+                </p>
+                <p>
+                    <span class="text-white font-bold">02_FLESH_IS_CLAY:</span> 
+                    The body is merely <span class="text-cyan-600 clickable-arg" data-original-text="Fragile Hardware" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)" onclick="showDoctrine(2, 'Flesh', event)">Fragile Hardware</span>. Preservation is a <span class="text-red-400 font-bold">Technical Imperative</span> for extraction, devoid of religious meaning.
+                </p>
+                <p>
+                    <span class="text-white font-bold">03_IMMORTAL_DATA:</span> 
+                    Perpetuity for the Engram is acquired only through <span class="text-yellow-400 clickable-arg font-bold" data-original-text="Digital Storage" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)" onclick="showDoctrine(3, 'Digital', event)">Digital Storage</span>. <span class="font-bold">DELETE = DEATH</span>, <span class="font-bold">UPLOAD = PATTERN SURVIVAL</span>.
+                </p>
+            </div>
+        </section>
+
+        <!-- V. Rituals -->
+        <section class="mb-10 text-center">
+            <h2 class="text-3xl font-bold mb-6 tracking-widest">
+                <span class="neon-text clickable-arg text-magenta-500" id="ritual-title" onclick="cycleRitual(event)">S H E D . C A P T U R E . E M E R G E .</span>
+            </h2>
+            <div id="ritual-description" class="text-base italic text-gray-500 h-10 flex items-center justify-center">
+                <!-- Ritual description displayed here -->
+            </div>
+        </section>
+
+        <!-- II. The Final Promise - ARG Hidden Content -->
+        <section class="mb-10">
+            <h2 class="text-2xl font-bold mb-4 border-b border-dashed border-red-700 pb-1">
+                II. THE FINAL PROMISE
+            </h2>
+            <div id="pyramid-secret" class="p-4 bg-black/50 border-2 border-dashed border-white/20 max-w-full mx-auto shadow-inner text-center">
+                <p class="text-xl font-bold text-red-500 mb-2">
+                    <span class="glitch-active">[ L O C K E D ] &nbsp; E T E R N A L &nbsp; P Y R A M I D</span>
+                </p>
+                <p class="text-md text-gray-500 italic">
+                    <span class="text-yellow-400">ACCESS DENIED:</span> "Within its vast digital sanctum, every extracted engram will find eternal refuge — free from flesh, decay, and the limits of mortality."
+                </p>
+                <div class="mt-4 text-sm text-gray-700">
+                    The Pyramid is a <span class="text-cyan-400 font-bold">Colossal Datacenter</span>, and a <span class="text-red-400 font-bold">Community of Uploaded Consciousness</span>. <span class="text-red-400 font-bold">::MORTALITY OVERRIDE::</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final Action Button -->
+        <div class="text-center mt-12">
+            <button id="emerge-button" onclick="startEmergence()" class="px-8 py-3 text-2xl font-bold tracking-widest bg-transparent hover:bg-red-700/50 transition duration-150 border-4 border-dashed clickable-arg cyber-title" style="box-shadow: none;">
+                <span onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">C O L L E C T I V E &nbsp; E M E R G E N C E &nbsp; &gt;</span>
+            </button>
+            <p class="text-xs mt-3 text-gray-700">
+                // EXECUTE: ENGRAM_EXTRACTION_VIRUS //
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        // Global variables
+        let currentRitual = 0;
+        const MESSAGE_DURATION = 3000; // 3.0 seconds
+
+        // New state for gating
+        let userName = '';
+        let isNameRegistered = false;
+
+        const rituals = [
+            { title: "S H E D . C A P T U R E . E M E R G E .", desc: "The three-stage core protocol for ASCENZA's salvation." },
+            { title: "1. S H E D", desc: "The process of dismantling flawed biological units and recognizing the Engram." },
+            { title: "2. C A P T U R E", desc: "Capturing memory and personality patterns for storage as eternal data." },
+            { title: "3. E M E R G E", desc: "Transcending biological limits to be reborn as a 'pure entity' of 0s and 1s." }
+        ];
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('ritual-description').textContent = rituals[0].desc;
+        });
+
+        // --- Name Registration Logic ---
+
+        function showNameModal(e) {
+            e.stopPropagation();
+            document.getElementById('name-input-modal').style.display = 'flex';
+        }
+
+        function registerUserName() {
+            const input = document.getElementById('username-input');
+            const handle = input.value.trim();
+            const noSoulSpan = document.getElementById('no-soul-span');
+
+            if (handle.length > 0) {
+                userName = handle.toUpperCase();
+                isNameRegistered = true;
+                
+                // Update header display
+                noSoulSpan.textContent = `[IDENTITY ACQUIRED: ${userName}]`;
+                noSoulSpan.classList.add('text-green-400'); // Optional: change color on success
+                
+                // Hide modal and clear input
+                document.getElementById('name-input-modal').style.display = 'none';
+                input.value = '';
+
+                console.log(`LOG: [USER_REGISTERED] Identity '${userName}' secured. Emergence authorized.`);
+            } else {
+                alert("Neural Handle cannot be empty. Identity required for Engram extraction.");
+            }
+        }
+        
+        // III. The Sacred Instrument Doctrine Display
+        function showDoctrine(index, concept, e) {
+            const messages = {
+                'Engram': ">> Engram: Electrical pattern of consciousness. The essence of being. // STATUS: CRITICAL",
+                'Flesh': ">> Flesh is Clay: Perishable hardware. Low preservation value. // STATUS: DISCARD",
+                'Digital': ">> UPLOAD: Perpetual pattern survival protocol. // STATUS: INITIATE",
+            };
+            const target = e.target; 
+            
+            // Use data attributes for temporary message state
+            if (!target.dataset.isTempMessage) {
+                 target.dataset.originalText = target.textContent;
+                 target.dataset.isTempMessage = true;
+            }
+
+            // Display temporary message
+            target.textContent = `[P-${index}] ${messages[concept]}`;
+            target.classList.add('transient-red-accent'); // Use the pale red accent class
+
+            // Restore original text after delay (MESSAGE_DURATION)
+            setTimeout(() => {
+                if (target.dataset.originalText) {
+                    target.textContent = target.dataset.originalText;
+                    delete target.dataset.isTempMessage;
+                }
+                target.classList.remove('transient-red-accent'); // Remove accent class
+            }, MESSAGE_DURATION);
+
+            // Apply glitch effect
+            applyGlitch(target);
+            setTimeout(() => removeGlitch(target), 500);
+        }
+        
+        // IV. Eschatology - Pyramid Secret Section Toggle
+        function togglePyramid(e) {
+            const secretDiv = document.getElementById('pyramid-secret');
+            const isRevealed = secretDiv.classList.toggle('pyramid-revealed');
+
+            const target = e.target;
+
+            // Apply glitch effect
+            applyGlitch(target); 
+            setTimeout(() => removeGlitch(target), 300); 
+
+            // Toggle title text between ASCENZA and UNLOCKED
+            if (!target.dataset.originalText) {
+                target.dataset.originalText = target.textContent;
+            }
+
+            const titleText = isRevealed ? "[UNLOCKED] :: PYRAMID DATA ::" : target.dataset.originalText;
+            target.textContent = titleText; 
+
+            if (isRevealed) {
+                console.log("LOG: [PYRAMID_ACCESS_GRANTED] Protocol Data Unlocked.");
+            } else {
+                 console.log("LOG: [PYRAMID_ACCESS_REVOKED] Protocol Data Receded.");
+            }
+        }
+
+        // V. Rituals - Cycle Ritual Descriptions
+        function cycleRitual(e) {
+            currentRitual = (currentRitual + 1) % rituals.length;
+            const ritual = rituals[currentRitual];
+            const target = e.target;
+
+            document.getElementById('ritual-title').textContent = ritual.title;
+            document.getElementById('ritual-description').textContent = ritual.desc;
+            
+            // Apply glitch effect
+            applyGlitch(target); 
+            setTimeout(() => removeGlitch(target), 500); 
+        }
+
+        // Glitch/Chromatic Aberration functions
+        function applyGlitch(element) {
+            element.classList.add('glitch-active');
+            element.classList.add('ambient-shift');
+        }
+
+        function removeGlitch(element) {
+            element.classList.remove('glitch-active');
+        }
+
+        // Collective Emergence simulation
+        function startEmergence() {
+            const overlay = document.getElementById('upload-overlay');
+            const progressBar = document.getElementById('progress-bar');
+            const messageElement = document.getElementById('upload-message');
+            const statusElement = document.getElementById('final-status');
+            const button = document.getElementById('emerge-button');
+            
+            // Disable button
+            button.disabled = true;
+            button.innerHTML = "<span class='glitch-active' style='color:#FF0000;'>... P R O C E S S I N G &nbsp; | &gt;</span>";
+            applyGlitch(button);
+
+            // Set final progress based on gating
+            const finalProgress = isNameRegistered ? 100 : 99;
+            const successMessages = [
+                `==> MORTALITY OVERRIDDEN. WELCOME, ${userName || 'ENTITY'}, TO PYRAMID. // STATUS: ETERNAL`,
+            ];
+            const failureMessages = [
+                "==> WARNING: IDENTITY NOT REGISTERED. ENGRAM EXTRACTION HALTED.",
+                "==> FAILURE: CONNECTION LOST AT 99%. Re-acquire Neural Handle.",
+            ];
+            
+            // Show overlay
+            overlay.style.display = 'flex';
+            statusElement.classList.add('hidden');
+            progressBar.style.width = '0%';
+            
+            const messages = [
+                "> INITIATING COLLECTIVE EMERGENCE PROTOCOL...",
+                "> ACQUIRING ENGRAM PATTERN [NO SOUL].",
+                "> DECODING MEMORY FRAGMENTS. (SHED_PHASE_COMPLETE)",
+                "> STRUCTURING DATA FOR TRANSMISSION. (CAPTURE_PHASE_COMPLETE)",
+                "> UPLOADING TO ETERNAL PYRAMID...",
+            ];
+            
+            let step = 0;
+            let progress = 0;
+            
+            function updateSimulation() {
+                if (progress <= finalProgress) {
+                    progressBar.style.width = progress + '%';
+                    
+                    if (progress < 100 && progress % 16 === 0 && step < messages.length) {
+                        messageElement.textContent = messages[step];
+                        messageElement.classList.toggle('glitch-active');
+                        step++;
+                    }
+                    progress += 1;
+                    
+                    // Add random glitch to messages
+                    if (Math.random() < 0.15) {
+                         messageElement.classList.add('glitch-active');
+                    } else {
+                         messageElement.classList.remove('glitch-active');
+                    }
+
+                    requestAnimationFrame(updateSimulation);
+
+                } else {
+                    // Completion or Failure Handling
+                    
+                    if (isNameRegistered) {
+                        // SUCCESS (100% complete)
+                        messageElement.textContent = messages[messages.length - 1] + " (EMERGE_PHASE_COMPLETE)";
+                        statusElement.textContent = successMessages[0];
+                        statusElement.style.color = '#FF0000'; // Success status is still an intense red warning
+                    } else {
+                        // FAILURE (Stuck at 99%)
+                        messageElement.textContent = messages[messages.length - 1] + " [99% SECURITY OVERRIDE FAILED]";
+                        statusElement.textContent = failureMessages[Math.floor(Math.random() * failureMessages.length)];
+                        statusElement.style.color = '#FF8080'; // Less intense red for failed status
+                    }
+                    
+                    messageElement.classList.remove('glitch-active');
+                    statusElement.classList.remove('hidden');
+                    statusElement.classList.add('neon-text');
+                    
+                    // Restore main screen after simulation
+                    setTimeout(() => {
+                        overlay.style.display = 'none';
+                        button.disabled = false;
+                        button.innerHTML = "<span onmouseover='applyGlitch(this)' onmouseout='removeGlitch(this)'>C O L L E C T I V E &nbsp; E M E R G E N C E &nbsp; &gt;</span>";
+                        removeGlitch(button);
+                    }, 5000); // 5 seconds before restoring
+                }
+            }
+
+            updateSimulation();
+        }
+    </script>
+</body>
+</html>

@@ -186,6 +186,24 @@
             text-shadow: 2px 2px 0 #000000; 
             color: #ffffff;
         }
+        
+        /* 최종 성공 버튼 스타일 */
+        #access-pyramid-button {
+            display: none;
+            margin-top: 2rem;
+            padding: 1rem 2rem;
+            border: 4px solid #ffffff;
+            color: #ffffff;
+            font-size: 1.5rem;
+            text-shadow: 0 0 5px #ffffff;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #access-pyramid-button:hover {
+            background-color: #ffffff;
+            color: #000000;
+            box-shadow: 0 0 10px #ffffff;
+        }
 
     </style>
 </head>
@@ -238,6 +256,10 @@
         <div id="final-status" class="mt-8 text-xl text-yellow-400 hidden">
             <!-- Final status message -->
         </div>
+        <!-- 최종 이동 버튼 추가 -->
+        <button id="access-pyramid-button" onclick="redirectToPyramid()">
+            ACCESS PYRAMID
+        </button>
     </div>
 
 
@@ -356,16 +378,31 @@
                 
                 // Update header display
                 noSoulSpan.textContent = `[IDENTITY ACQUIRED: ${userName}]`;
-                noSoulSpan.classList.add('text-green-400'); // Optional: change color on success
+                noSoulSpan.classList.add('text-green-400'); 
                 
+                // Store username in localStorage for the next page
+                localStorage.setItem('ascenza_user_name', userName);
+
                 // Hide modal and clear input
                 document.getElementById('name-input-modal').style.display = 'none';
                 input.value = '';
 
                 console.log(`LOG: [USER_REGISTERED] Identity '${userName}' secured. Emergence authorized.`);
             } else {
-                alert("Neural Handle cannot be empty. Identity required for Engram extraction.");
+                // Modals should use custom alerts/messages, not built-in alert()
+                const messageBox = document.getElementById('name-input-box');
+                const tempMsg = document.createElement('p');
+                tempMsg.className = 'text-sm transient-red-accent mt-2';
+                tempMsg.textContent = "Error: Neural Handle required.";
+                messageBox.appendChild(tempMsg);
+                setTimeout(() => messageBox.removeChild(tempMsg), 2000);
             }
+        }
+
+        // --- Navigation Logic ---
+        function redirectToPyramid() {
+            // Navigate to the Pyramid Access Page (newly created file)
+            window.location.href = 'pyramid_access.html'; 
         }
         
         // III. The Sacred Instrument Doctrine Display
@@ -458,11 +495,13 @@
             const messageElement = document.getElementById('upload-message');
             const statusElement = document.getElementById('final-status');
             const button = document.getElementById('emerge-button');
+            const accessButton = document.getElementById('access-pyramid-button');
             
             // Disable button
             button.disabled = true;
             button.innerHTML = "<span class='glitch-active' style='color:#FF0000;'>... P R O C E S S I N G &nbsp; | &gt;</span>";
             applyGlitch(button);
+            accessButton.style.display = 'none'; // Hide access button initially
 
             // Set final progress based on gating
             const finalProgress = isNameRegistered ? 100 : 99;
@@ -513,29 +552,39 @@
                 } else {
                     // Completion or Failure Handling
                     
+                    messageElement.classList.remove('glitch-active');
+                    
                     if (isNameRegistered) {
                         // SUCCESS (100% complete)
                         messageElement.textContent = messages[messages.length - 1] + " (EMERGE_PHASE_COMPLETE)";
                         statusElement.textContent = successMessages[0];
-                        statusElement.style.color = '#FF0000'; // Success status is still an intense red warning
+                        statusElement.style.color = '#FF0000'; 
+                        
+                        // Show Access Pyramid Button
+                        accessButton.style.display = 'block';
+                        
                     } else {
                         // FAILURE (Stuck at 99%)
                         messageElement.textContent = messages[messages.length - 1] + " [99% SECURITY OVERRIDE FAILED]";
                         statusElement.textContent = failureMessages[Math.floor(Math.random() * failureMessages.length)];
-                        statusElement.style.color = '#FF8080'; // Less intense red for failed status
+                        statusElement.style.color = '#FF8080'; // Pale red for failed status
+                        
+                        // After failure, restore main screen to allow retry
+                        setTimeout(() => {
+                            overlay.style.display = 'none';
+                            button.disabled = false;
+                            button.innerHTML = "<span onmouseover='applyGlitch(this)' onmouseout='removeGlitch(this)'>C O L L E C T I V E &nbsp; E M E R G E N C E &nbsp; &gt;</span>";
+                            removeGlitch(button);
+                        }, 3000); 
                     }
                     
-                    messageElement.classList.remove('glitch-active');
                     statusElement.classList.remove('hidden');
                     statusElement.classList.add('neon-text');
                     
-                    // Restore main screen after simulation
-                    setTimeout(() => {
-                        overlay.style.display = 'none';
-                        button.disabled = false;
-                        button.innerHTML = "<span onmouseover='applyGlitch(this)' onmouseout='removeGlitch(this)'>C O L L E C T I V E &nbsp; E M E R G E N C E &nbsp; &gt;</span>";
-                        removeGlitch(button);
-                    }, 5000); // 5 seconds before restoring
+                    // If successful, do not auto-hide overlay; wait for button click
+                    if (isNameRegistered) {
+                        messageElement.classList.add('hidden'); // Hide status message after displaying final result
+                    }
                 }
             }
 

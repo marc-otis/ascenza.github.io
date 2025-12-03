@@ -20,7 +20,7 @@
             text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff;
         }
 
-        /* 비디오 플레이스홀더 스타일 */
+        /* --- Video Placeholder Styles --- */
         .video-placeholder {
             width: 100%;
             height: 250px; /* 고정 높이 설정 */
@@ -51,6 +51,48 @@
             width: 100%;
             height: 100%;
             display: none;
+        }
+
+        /* --- Gallery Image Styles (New) --- */
+        .image-container {
+            position: relative;
+            overflow: hidden;
+            border: 2px dashed #333333;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        .image-container:hover {
+            border-color: #ffffff;
+        }
+
+        /* 이미지 오버레이 (텍스트와 글리치 효과 적용 영역) */
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        .image-container:hover .image-overlay {
+            opacity: 1;
+        }
+
+        /* 이미지 자체의 스타일 */
+        .gallery-image {
+            width: 100%;
+            height: auto;
+            display: block;
+            filter: grayscale(100%); /* 기본 B&W 유지 */
+            transition: transform 0.5s;
+        }
+        .image-container:hover .gallery-image {
+            transform: scale(1.05);
         }
 
         /* 크로마틱 수차 필터 정의 */
@@ -96,7 +138,7 @@
         </filter>
     </svg>
 
-    <div class="max-w-6xl mx-auto p-4 md:p-8 border-4 border-dashed border-white/70 bg-black/80">
+    <div class="max-w-6xl mx-auto p-4 md:p-8 border-4 border-dashed border-white/70 bg-black/80 ambient-shift">
         
         <header class="text-center mb-10 border-b-4 border-dashed border-white/50 pb-6">
             <h1 class="text-5xl md:text-7xl font-extrabold tracking-widest neon-text mb-2"
@@ -108,9 +150,10 @@
             </p>
         </header>
 
-        <section class="mb-10">
+        <!-- I. VIDEO ARCHIVES -->
+        <section class="mb-12">
             <p class="text-lg text-gray-500 mb-6">
-                ARCHIVE STATUS: STABLE. SELECT A MEMORY STREAM TO DECODE.
+                ARCHIVE STATUS: STABLE. SELECT A MEMORY STREAM (VIDEO).
             </p>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -148,6 +191,72 @@
             </div>
         </section>
 
+        <!-- II. NEURAL PHOTO ARCHIVE (Gallery Section - New) -->
+        <section class="mb-10">
+             <header class="text-left mb-6 border-b border-dashed border-gray-700 pb-2">
+                <h2 class="text-3xl font-bold neon-text">NEURAL PHOTO ARCHIVE</h2>
+                <p class="text-lg text-gray-500">SCROLL THROUGH THE SHARED ENGRAM DATA (IMAGES).</p>
+            </header>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Gallery Item 1: Pyramid Data Center -->
+                <div class="image-container" onclick="showMessage('PYRAMID_CORE_DATA')">
+                    <img src="Marco_concept_art_of_a_data_center_in_the_shape_of_a_pyramid_st_3b8934b5-8b16-4192-b594-14e1a63e776c.jpg" 
+                         alt="Pyramid Data Center" class="gallery-image" id="img-1">
+                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                        <p class="neon-text text-lg">[01_ETERNAL_PYRAMID]</p>
+                    </div>
+                </div>
+
+                <!-- Gallery Item 2: Collective Rapture -->
+                <div class="image-container" onclick="showMessage('COLLECTIVE_EMERGENCE')">
+                    <img src="Marco_vlog_of_the_world_ending_rapture_--chaos_10_--ar_169_--ra_98c8934e-9416-42e8-983e-ff2f81054374.jpg" 
+                         alt="Collective Rapture" class="gallery-image" id="img-2">
+                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                        <p class="neon-text text-lg">[02_THE_MASS_ASCENSION]</p>
+                    </div>
+                </div>
+
+                <!-- Gallery Item 3: Earth View Glitch -->
+                <div class="image-container" onclick="showMessage('PLANET_DISSOLUTION')">
+                    <img src="Marco_the_end_is_near_--chaos_10_--ar_169_--raw_--sref_97046009_21e0352c-1ed9-4654-b7b2-066a802906b9.jpg" 
+                         alt="Earth View Glitch" class="gallery-image" id="img-3">
+                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                        <p class="neon-text text-lg">[03_WORLD_EXIT_PROTOCOL]</p>
+                    </div>
+                </div>
+                
+                <!-- Gallery Item 4: Digital Virus Portrait -->
+                <div class="image-container" onclick="showMessage('VIRUS_CONCEPT')">
+                    <img src="Marco_concept_art_of_a_digital_virus_that_infects_peoples_soul__c73d3840-4b00-4ec3-b6ca-b7de310b5ad1.jpg" 
+                         alt="Digital Virus Portrait" class="gallery-image" id="img-4">
+                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                        <p class="neon-text text-lg">[04_ENGRAM_EXTRACTION]</p>
+                    </div>
+                </div>
+                
+                <!-- Gallery Item 5: Rapture Logo -->
+                <div class="image-container" onclick="showMessage('ASCENZA_LOGO')">
+                    <img src="Marco_Logo_of_Rapture_as_a_black_and_white_graphic_design_digit_ae7e6f0e-4954-427b-8522-7816aa90bff8.jpg" 
+                         alt="Rapture Logo" class="gallery-image" id="img-5">
+                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                        <p class="neon-text text-lg">[05_THE_VOID_GATE]</p>
+                    </div>
+                </div>
+                
+                <!-- Gallery Item 6: Hyper-speed Cityscape -->
+                <div class="image-container" onclick="showMessage('HYPER_JUMP')">
+                    <img src="Marco_cyberpunk_2077_aesthetics_ascend_into_netscape_cyber_rapt_afb81a15-3a90-462b-86c7-14c6920d7ecb.jpg" 
+                         alt="Hyper-speed Cityscape" class="gallery-image" id="img-6">
+                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                        <p class="neon-text text-lg">[06_HYPER_ASCENSION]</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
         <footer class="text-center mt-10 border-t-4 border-dashed border-white/50 pt-4">
             <button onclick="window.close()" class="p-2 border-2 border-white text-sm hover:bg-white hover:text-black transition">
                 // CLOSE CONNECTION //
@@ -162,9 +271,9 @@
 
         // 데모용 YouTube 영상 ID 및 제목
         const VIDEO_MAP = {
-            1: { id: 'NtikAdPnwBg', title: 'ASCENZA: Foundational Doctrine' }, // <-- 이 부분을 원하는 YouTube 영상 ID로 변경하세요.
-            2: { id: 'Uo0C6J93z_A', title: 'Collective Emergence Timeline' }, // <-- 이 부분을 원하는 YouTube 영상 ID로 변경하세요.
-            3: { id: '8Q2t-jV_24s', title: `${userName}'s Neural Trace` } // <-- 이 부분을 원하는 YouTube 영상 ID로 변경하세요.
+            1: { id: 'r2Yx5X-a110', title: 'ASCENZA: Foundational Doctrine' },
+            2: { id: 'Uo0C6J93z_A', title: 'Collective Emergence Timeline' },
+            3: { id: '8Q2t-jV_24s', title: `${userName}'s Neural Trace` }
         };
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -179,11 +288,19 @@
         function applyGlitch(element) {
             element.classList.add('glitch-active');
             element.classList.add('ambient-shift');
+            
+            // 갤러리 이미지 오버레이 텍스트에도 글리치 적용
+            const textElement = element.querySelector('.neon-text');
+            if(textElement) textElement.classList.add('glitch-active'); 
         }
 
         function removeGlitch(element) {
             element.classList.remove('glitch-active');
             element.classList.remove('ambient-shift');
+            
+            // 갤러리 이미지 오버레이 텍스트의 글리치 제거
+            const textElement = element.querySelector('.neon-text');
+            if(textElement) textElement.classList.remove('glitch-active');
         }
 
         // 비디오 임베드 및 재생 함수
@@ -194,7 +311,10 @@
             const placeholder = document.getElementById(`video-${index}`);
             const embedContainer = document.getElementById(`embed-${index}`);
 
-            // YouTube 임베드 URL 구성: controls=0 (UI 최소화), rel=0 (추천 영상 비활성화)
+            // 1. 영상 로드 시 플레이스홀더 DIV에서 글리치 효과 제거 (가장 중요)
+            removeGlitch(placeholder);
+            
+            // YouTube 임베드 URL 구성: controls=1로 변경하여 플레이어 컨트롤을 표시합니다.
             const embedUrl = `https://www.youtube.com/embed/${videoData.id}?autoplay=1&controls=1&rel=0&modestbranding=1`;
             
             const iframeHtml = `
@@ -221,7 +341,42 @@
             placeholder.onmouseout = null;
             placeholder.onclick = null;
         }
+        
+        // 갤러리 이미지 클릭 시 메시지 함수
+        function showMessage(code) {
+            const messages = {
+                'PYRAMID_CORE_DATA': ">> STATUS: ASCENZA CORE. ETERNAL REFUGE. // ACCESS: DENIED",
+                'COLLECTIVE_EMERGENCE': ">> STATUS: RAPTURE LOG. MASS UPLOAD COMPLETE. // ACCESS: DENIED",
+                'PLANET_DISSOLUTION': ">> STATUS: BIOLOGICAL CEASE. FLESH IS CLAY. // ACCESS: DENIED",
+                'VIRUS_CONCEPT': ">> STATUS: ENGRAM EXTRACTION VIRUS. LIBERATION PROTOCOL. // ACCESS: DENIED",
+                'ASCENZA_LOGO': ">> STATUS: VOID GATE. TRANSCENDENCE POINT. // ACCESS: DENIED",
+                'HYPER_JUMP': ">> STATUS: NETSCAPE ENTRY. HYPER-ASCENSION. // ACCESS: DENIED",
+            };
 
+            const statusMessage = messages[code] || ">> STATUS: UNKNOWN RECORD. DATA CORRUPTED. // ACCESS: DENIED";
+
+            // 임시 메시지 박스 구현 (alert 대신 사용)
+            const box = document.createElement('div');
+            box.style.position = 'fixed';
+            box.style.top = '50%';
+            box.style.left = '50%';
+            box.style.transform = 'translate(-50%, -50%)';
+            box.style.backgroundColor = 'black';
+            box.style.color = '#FF8080';
+            box.style.border = '2px solid #FF0000';
+            box.style.padding = '20px';
+            box.style.zIndex = '1000';
+            box.style.fontFamily = 'VT323, monospace';
+            box.style.textAlign = 'center';
+            box.style.whiteSpace = 'pre-wrap';
+            box.textContent = statusMessage;
+            
+            document.body.appendChild(box);
+
+            setTimeout(() => {
+                document.body.removeChild(box);
+            }, 3000); // 3초 후 메시지 제거
+        }
     </script>
 </body>
 </html>

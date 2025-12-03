@@ -6,24 +6,42 @@
     <title>PYRAMID ACCESS: NEURAL RECORDS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Retro/Terminal 폰트 스타일링 */
+        /* Retro/Terminal Font Styling */
         @import url('https://fonts.googleapis.com/css2?family=VT323&family=Inter:wght@100..900&display=swap');
         body {
             font-family: 'VT323', monospace, 'Inter', sans-serif;
             background-color: #000000;
             color: #ffffff;
-            line-height: 1.1; 
+            line-height: 1.1;
+            /* Prevent horizontal scroll */
+            overflow-x: hidden;
         }
 
-        /* 텍스트 글로우 효과 */
+        /* 텍스트 글로우 효과 (White/RGB Glitch Focus) */
         .neon-text {
-            text-shadow: 0 0 5px #ffffff, 0 0 10px #ffffff;
+            /* 메인 텍스트: 흰색 기반의 은은한 글로우 */
+            text-shadow: 0 0 5px #ffffff, 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        .neon-red {
+            /* 강조 텍스트 (빨간색) */
+            text-shadow: 0 0 4px #ff4444, 0 0 8px #ff0000, 0 0 12px #ff0000;
+        }
+
+        /* --- Ambient Shift & Pulse Animations --- */
+        /* 테두리 펄스 효과: 순수한 B&W 밝기 조절 펄스로 변경 */
+        @keyframes border-pulse {
+            0%, 100% { border-color: #ffffff; box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); }
+            50% { border-color: #888888; box-shadow: 0 0 0 rgba(255, 255, 255, 0.0); } /* Dim/darken */
+        }
+
+        .pulsing-border {
+            animation: border-pulse 4s infinite alternate;
         }
 
         /* --- Video Placeholder Styles --- */
         .video-placeholder {
             width: 100%;
-            height: 250px; /* 고정 높이 설정 */
+            height: 250px;
             background-color: #111111;
             border: 2px dashed #ffffff;
             display: flex;
@@ -35,15 +53,15 @@
             color: #808080;
             cursor: pointer;
             transition: all 0.2s;
-            position: relative; /* iframe 포함을 위해 필요 */
+            position: relative;
         }
         .video-placeholder:hover {
-            color: #ffffff; /* 호버 시 텍스트 색상을 흰색으로 유지하여 글리치 효과 극대화 */
-            border-color: #ffffff;
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+            color: #ffffff;
+            border-color: #ffffff; 
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5); 
         }
 
-        /* 비디오 iframe 스타일 (비디오가 컨테이너에 꽉 차도록) */
+        /* Video iframe style */
         .video-embed {
             position: absolute;
             top: 0;
@@ -53,27 +71,29 @@
             display: none;
         }
 
-        /* --- Gallery Image Styles (New) --- */
+        /* --- Gallery Image Styles --- */
         .image-container {
             position: relative;
             overflow: hidden;
             border: 2px dashed #333333;
             cursor: pointer;
-            transition: border-color 0.3s;
-            aspect-ratio: 1 / 1; /* 이미지 컨테이너를 정사각형으로 유지 */
+            transition: border-color 0.3s, box-shadow 0.3s;
+            aspect-ratio: 1 / 1;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
         }
         .image-container:hover {
-            border-color: #ffffff;
+            border-color: #ffffff; 
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5); 
         }
 
-        /* 이미지 오버레이 (텍스트와 글리치 효과 적용 영역) */
+        /* Image overlay */
         .image-overlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.6);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -84,37 +104,26 @@
             opacity: 1;
         }
 
-        /* 이미지 자체의 스타일 */
+        /* Image itself */
         .gallery-image {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 컨테이너를 채우도록 설정 */
+            object-fit: cover;
             display: block;
-            filter: grayscale(100%); /* 기본 B&W 유지 */
+            filter: grayscale(100%);
             transition: transform 0.5s;
         }
         .image-container:hover .gallery-image {
             transform: scale(1.05);
         }
 
-        /* 크로마틱 수차 필터 정의 */
+        /* Chromatic Aberration Filter (Glitch) */
         .glitch-active {
             filter: url(#glitch);
         }
         
-        /* 미세한 움직임 (ASCENZA 페이지에서 복사) */
-        @keyframes subtle-shift {
-            0%, 100% { transform: translate(0, 0); }
-            25% { transform: translate(1px, -1px); }
-            50% { transform: translate(-1px, 1px); }
-            75% { transform: translate(1px, 1px); }
-        }
+        /* --- Connection Close Overlay Style --- */
 
-        .ambient-shift {
-            animation: subtle-shift 8s infinite alternate;
-        }
-
-        /* --- Connection Close Overlay Style (New) --- */
         #close-overlay {
             position: fixed;
             top: 0;
@@ -133,64 +142,83 @@
         #close-overlay.active {
             opacity: 1;
         }
+
         .close-message {
             color: #ffffff;
             font-size: 3rem;
-            text-shadow: 0 0 15px #FF0000;
+            /* 초기 글자 숨김 상태 (JS가 타이핑 시작할 때 나타남) */
+            opacity: 0; 
+            transition: opacity 0.1s;
+        }
+        
+        /* 글자 뒤섞임 효과는 JS에서 동적으로 글자와 필터를 조작하여 구현 */
+        .strong-glitch-text {
+            /* Glitch effect is dynamically applied by JS */
         }
 
     </style>
 </head>
-<body class="bg-black text-white min-h-screen p-4 sm:p-8">
+<body class="bg-black text-white min-h-screen p-2 sm:p-4">
 
-    <!-- 크로마틱 수차 필터 정의 (숨겨짐) -->
+    <!-- Chromatic Aberration Filter Definition (Hidden) -->
     <svg style="position: absolute; width: 0; height: 0;">
         <filter id="glitch">
+            <!-- R component offset -->
             <feOffset in="SourceGraphic" dx="3" dy="0" result="r" />
+            <!-- G component offset -->
             <feOffset in="SourceGraphic" dx="-3" dy="0" result="g" />
+            <!-- B component offset -->
             <feOffset in="SourceGraphic" dx="0" dy="3" result="b" />
+
+            <!-- Color Matrix for R (Only Red Channel) -->
             <feColorMatrix in="r" type="matrix" values="1 0 0 0 0 
-                                                        0 0 0 0 0 
-                                                        0 0 0 0 0 
-                                                        0 0 0 1 0" result="r_color" />
+                                                         0 0 0 0 0 
+                                                         0 0 0 0 0 
+                                                         0 0 0 1 0" result="r_color" />
+            <!-- Color Matrix for G (Only Green Channel) -->
             <feColorMatrix in="g" type="matrix" values="0 0 0 0 0 
-                                                        0 1 0 0 0 
-                                                        0 0 0 0 0 
-                                                        0 0 0 1 0" result="g_color" />
+                                                         0 1 0 0 0 
+                                                         0 0 0 0 0 
+                                                         0 0 0 1 0" result="g_color" />
+            <!-- Color Matrix for B (Only Blue Channel) -->
             <feColorMatrix in="b" type="matrix" values="0 0 0 0 0 
-                                                        0 0 0 0 0 
-                                                        0 0 1 0 0 
-                                                        0 0 0 1 0" result="b_color" />
+                                                         0 0 0 0 0 
+                                                         0 0 1 0 0 
+                                                         0 0 0 1 0" result="b_color" />
+
+            <!-- Blend all channels using screen mode (additive) -->
             <feBlend in="r_color" in2="g_color" mode="screen" result="rg_blend" />
             <feBlend in="rg_blend" in2="b_color" mode="screen" />
         </filter>
     </svg>
 
-    <!-- 연결 종료 오버레이 -->
+    <!-- Connection Close Overlay -->
     <div id="close-overlay">
-        <h1 class="close-message neon-text">ENTRAPPED IN CLAY</h1>
+        <!-- 타이핑 + 간헐적 글리치 효과 적용 -->
+        <h1 class="close-message strong-glitch-text" id="close-message-text"></h1>
     </div>
 
 
-    <div class="max-w-6xl mx-auto p-4 md:p-8 border-4 border-dashed border-white/70 bg-black/80 ambient-shift">
+    <div class="max-w-6xl mx-auto p-4 md:p-8 border-4 border-dashed border-white/70 bg-black/80 pulsing-border">
         
-        <header class="text-center mb-10 border-b-4 border-dashed border-white/50 pb-6">
-            <h1 class="text-5xl md:text-7xl font-extrabold tracking-widest neon-text mb-2"
+        <header class="text-center mb-8 border-b-4 border-dashed border-white/50 pb-4">
+            <!-- 메인 타이틀은 흰색 네온/글리치 유지 -->
+            <h1 class="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-widest neon-text mb-2"
                 onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
                 PYRAMID ACCESS GRANTED
             </h1>
-            <p class="text-xl italic text-red-400">
+            <p class="text-lg italic text-red-400">
                 // VIEWING NEURAL RECORD ARCHIVES //
             </p>
         </header>
 
         <!-- I. VIDEO ARCHIVES -->
-        <section class="mb-12">
-            <p class="text-lg text-gray-500 mb-6">
+        <section class="mb-10">
+            <p class="text-md text-gray-500 mb-4 border-b border-dashed border-gray-700 pb-2">
                 ARCHIVE STATUS: STABLE. SELECT A MEMORY STREAM (VIDEO).
             </p>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 
                 <!-- Video 1: Foundational Engram -->
                 <div class="video-placeholder" id="video-1" 
@@ -198,7 +226,7 @@
                      onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
                     <p class="mb-2 neon-text">[01_FOUNDATIONAL_ENGRAM]</p>
                     <p class="text-sm">SOURCE: ASCENZA CORE / STATUS: ENCRYPTED</p>
-                    <p class="text-xs mt-2 text-red-500">CLICK TO INITIATE DECRYPTION</p>
+                    <p class="text-xs mt-2 text-red-500 neon-red">CLICK TO INITIATE DECRYPTION</p>
                     <div class="video-embed" id="embed-1"></div>
                 </div>
 
@@ -208,7 +236,7 @@
                      onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
                     <p class="mb-2 neon-text">[02_COLLECTIVE_EMERGENCE_LOG]</p>
                     <p class="text-sm">SOURCE: LOGIC STREAM / STATUS: READ-ONLY</p>
-                    <p class="text-xs mt-2 text-red-500">CLICK TO INITIATE DECRYPTION</p>
+                    <p class="text-xs mt-2 text-red-500 neon-red">CLICK TO INITIATE DECRYPTION</p>
                     <div class="video-embed" id="embed-2"></div>
                 </div>
 
@@ -217,110 +245,119 @@
                      onclick="loadVideo(3)"
                      onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
                     <p class="mb-2 neon-text">[03_USER_NEURAL_ARCHIVE]</p>
-                    <p class="text-sm" id="user-archive-source">SOURCE: NEURAL HANDLE ${userName || 'GUEST'} / STATUS: LOCAL DATA</p>
-                    <p class="text-xs mt-2 text-red-500">CLICK TO INITIATE DECRYPTION</p>
+                    <p class="text-sm" id="user-archive-source">SOURCE: NEURAL HANDLE GUEST / STATUS: LOCAL DATA</p>
+                    <p class="text-xs mt-2 text-red-500 neon-red">CLICK TO INITIATE DECRYPTION</p>
                     <div class="video-embed" id="embed-3"></div>
                 </div>
 
             </div>
         </section>
 
-        <!-- II. NEURAL PHOTO ARCHIVE (Gallery Section - New) -->
+        <!-- II. NEURAL PHOTO ARCHIVE (Gallery Section - 9 images restored) -->
         <section class="mb-10">
-             <header class="text-left mb-6 border-b border-dashed border-gray-700 pb-2">
+            <header class="text-left mb-4 border-b border-dashed border-gray-700 pb-2">
                 <h2 class="text-3xl font-bold neon-text">NEURAL PHOTO ARCHIVE</h2>
-                <p class="text-lg text-gray-500">SCROLL THROUGH THE SHARED ENGRAM DATA (IMAGES).</p>
+                <p class="text-md text-gray-500">SCROLL THROUGH THE SHARED ENGRAM DATA (IMAGES).</p>
             </header>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 9 items fit best in a 3-column grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-4">
                 
                 <!-- Gallery Item 1: Pyramid Isometric (3b8934b5) -->
                 <div class="image-container" onclick="showMessage('PYRAMID_CORE_DATA')">
-                    <img src="Marco_concept_art_of_a_data_center_in_the_shape_of_a_pyramid_st_3b8934b5-8b16-4192-b594-14e1a63e776c.png" 
-                         alt="Pyramid Data Center (Isometric)" class="gallery-image" id="img-1">
-                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                    <img src="Marco_concept_art_of_a_data_center_in_the_shape_of_a_pyramid_st_3b8934b5-8b16-4192-b594-14e1a63e776c.jpg" 
+                          alt="Pyramid Data Center (Isometric)" class="gallery-image" id="img-1" 
+                          onerror="this.onerror=null; this.src='https://placehold.co/400x400/1e293b/a5b4fc?text=MISSING_3b8934b5';">
+                    <div class="image-overlay" onmouseover="applyGlitch(this.parentNode.querySelector('.neon-text'))" onmouseout="removeGlitch(this.parentNode.querySelector('.neon-text'))">
                         <p class="neon-text text-lg">[01_ISOMETRIC_PYRAMID]</p>
                     </div>
                 </div>
 
                 <!-- Gallery Item 2: Collective Rapture Silhouette (98c8934e) -->
                 <div class="image-container" onclick="showMessage('COLLECTIVE_EMERGENCE')">
-                    <img src="Marco_vlog_of_the_world_ending_rapture_--chaos_10_--ar_169_--ra_98c8934e-9416-42e8-983e-ff2f81054374.png" 
-                         alt="Collective Rapture Silhouette" class="gallery-image" id="img-2">
-                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                    <img src="Marco_vlog_of_the_world_ending_rapture_--chaos_10_--ar_169_--ra_98c8934e-9416-42e8-983e-ff2f81054374.jpg" 
+                          alt="Collective Rapture Silhouette" class="gallery-image" id="img-2"
+                          onerror="this.onerror=null; this.src='https://placehold.co/400x400/374151/d1d5db?text=MISSING_98c8934e';">
+                    <div class="image-overlay" onmouseover="applyGlitch(this.parentNode.querySelector('.neon-text'))" onmouseout="removeGlitch(this.parentNode.querySelector('.neon-text'))">
                         <p class="neon-text text-lg">[02_THE_MASS_ASCENSION]</p>
                     </div>
                 </div>
 
-                <!-- Gallery Item 3: Earth View Glitch (the_end_is_near) -->
+                <!-- Gallery Item 3: World Exit Protocol (21e0352c) -->
                 <div class="image-container" onclick="showMessage('PLANET_DISSOLUTION')">
-                    <img src="Marco_the_end_is_near_--chaos_10_--ar_169_--raw_--sref_97046009_21e0352c-1ed9-4654-b7b2-066a802906b9.png" 
-                         alt="Earth View Glitch" class="gallery-image" id="img-3">
-                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                    <img src="Marco_the_end_is_near_--chaos_10_--ar_169_--raw_--sref_97046009_21e0352c-1ed9-4654-b7b2-066a802906b9.jpg" 
+                          alt="Earth View Glitch" class="gallery-image" id="img-3"
+                          onerror="this.onerror=null; this.src='https://placehold.co/400x400/991b1b/fca5a5?text=MISSING_21e0352c';">
+                    <div class="image-overlay" onmouseover="applyGlitch(this.parentNode.querySelector('.neon-text'))" onmouseout="removeGlitch(this.parentNode.querySelector('.neon-text'))">
                         <p class="neon-text text-lg">[03_WORLD_EXIT_PROTOCOL]</p>
                     </div>
                 </div>
                 
-                <!-- Gallery Item 4: Digital Virus Portrait (c73d3840) -->
+                <!-- Gallery Item 4: Neural Corruption Triptych (c73d3840) -->
                 <div class="image-container" onclick="showMessage('VIRUS_CONCEPT_TRIPTYCH')">
-                    <img src="Marco_concept_art_of_a_digital_virus_that_infects_peoples_soul__c73d3840-4b00-4ec3-b6ca-b7de310b5ad1.png" 
-                         alt="Digital Virus Portrait Triptych" class="gallery-image" id="img-4">
-                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                    <img src="Marco_concept_art_of_a_digital_virus_that_infects_peoples_soul__c73d3840-4b00-4ec3-b6ca-b7de310b5ad1.jpg" 
+                          alt="Digital Virus Portrait Triptych" class="gallery-image" id="img-4"
+                          onerror="this.onerror=null; this.src='https://placehold.co/400x400/064e3b/6ee7b7?text=MISSING_c73d3840';">
+                    <div class="image-overlay" onmouseover="applyGlitch(this.parentNode.querySelector('.neon-text'))" onmouseout="removeGlitch(this.parentNode.querySelector('.neon-text'))">
                         <p class="neon-text text-lg">[04_NEURAL_CORRUPTION]</p>
                     </div>
                 </div>
                 
-                <!-- Gallery Item 5: Rapture Logo (ae7e6f0e) -->
+                <!-- Gallery Item 5: The Void Gate Logo (ae7e6f0e) -->
                 <div class="image-container" onclick="showMessage('ASCENZA_LOGO')">
-                    <img src="Marco_Logo_of_Rapture_as_a_black_and_white_graphic_design_digit_ae7e6f0e-4954-427b-8522-7816aa90bff8.png" 
-                         alt="Rapture Logo" class="gallery-image" id="img-5">
-                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                    <img src="Marco_Logo_of_Rapture_as_a_black_and_white_graphic_design_digit_ae7e6f0e-4954-427b-8522-7816aa90bff8.jpg" 
+                          alt="Rapture Logo" class="gallery-image" id="img-5"
+                          onerror="this.onerror=null; this.src='https://placehold.co/400x400/0f172a/94a3b8?text=MISSING_ae7e6f0e';">
+                    <div class="image-overlay" onmouseover="applyGlitch(this.parentNode.querySelector('.neon-text'))" onmouseout="removeGlitch(this.parentNode.querySelector('.neon-text'))">
                         <p class="neon-text text-lg">[05_THE_VOID_GATE]</p>
                     </div>
                 </div>
                 
-                <!-- Gallery Item 6: Hyper-speed Cityscape (afb81a15) -->
+                <!-- Gallery Item 6: Hyper Ascension (afb81a15) -->
                 <div class="image-container" onclick="showMessage('HYPER_JUMP')">
-                    <img src="Marco_cyberpunk_2077_aesthetics_ascend_into_netscape_cyber_rapt_afb81a15-3a90-462b-86c7-14c6920d7ecb.png" 
-                         alt="Hyper-speed Cityscape" class="gallery-image" id="img-6">
-                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                    <img src="Marco_cyberpunk_2077_aesthetics_ascend_into_netscape_cyber_rapt_afb81a15-3a90-462b-86c7-14c6920d7ecb.jpg" 
+                          alt="Hyper-speed Cityscape" class="gallery-image" id="img-6"
+                          onerror="this.onerror=null; this.src='https://placehold.co/400x400/0c4a6e/93c5fd?text=MISSING_afb81a15';">
+                    <div class="image-overlay" onmouseover="applyGlitch(this.parentNode.querySelector('.neon-text'))" onmouseout="removeGlitch(this.parentNode.querySelector('.neon-text'))">
                         <p class="neon-text text-lg">[06_HYPER_ASCENSION]</p>
                     </div>
                 </div>
 
-                <!-- Gallery Item 7: Pyramid Glow (96c4e591) -->
+                <!-- Gallery Item 7: Eternal Beacon (96c4e591) -->
                 <div class="image-container" onclick="showMessage('PYRAMID_GLOW')">
-                    <img src="Marco_concept_art_of_a_data_center_in_the_shape_of_a_pyramid_st_96c4e591-5737-4416-b810-f15aca3f946f.png" 
-                         alt="Pyramid Glow" class="gallery-image" id="img-7">
-                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                    <img src="Marco_concept_art_of_a_data_center_in_the_shape_of_a_pyramid_st_96c4e591-5737-4416-b810-f15aca3f946f.jpg" 
+                          alt="Pyramid Glow" class="gallery-image" id="img-7"
+                          onerror="this.onerror=null; this.src='https://placehold.co/400x400/1e293b/a5b4fc?text=MISSING_96c4e591';">
+                    <div class="image-overlay" onmouseover="applyGlitch(this.parentNode.querySelector('.neon-text'))" onmouseout="removeGlitch(this.parentNode.querySelector('.neon-text'))">
                         <p class="neon-text text-lg">[07_ETERNAL_BEACON]</p>
                     </div>
                 </div>
 
-                <!-- Gallery Item 8: Earth View Glitch 2 (182f97d5) -->
+                <!-- Gallery Item 8: Trace Destruction (182f97d5) -->
                 <div class="image-container" onclick="showMessage('PLANET_GLITCH')">
-                    <img src="Marco_vlog_of_the_world_ending_rapture_--chaos_10_--ar_169_--ra_182f97d5-719a-4205-ac1f-8cad70b02f64.png" 
-                         alt="Earth View Glitch 2" class="gallery-image" id="img-8">
-                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                    <img src="Marco_vlog_of_the_world_ending_rapture_--chaos_10_--ar_169_--ra_182f97d5-719a-4205-ac1f-8cad70b02f64.jpg" 
+                          alt="Earth View Glitch 2" class="gallery-image" id="img-8"
+                          onerror="this.onerror=null; this.src='https://placehold.co/400x400/991b1b/fca5a5?text=MISSING_182f97d5';">
+                    <div class="image-overlay" onmouseover="applyGlitch(this.parentNode.querySelector('.neon-text'))" onmouseout="removeGlitch(this.parentNode.querySelector('.neon-text'))">
                         <p class="neon-text text-lg">[08_TRACE_DESTRUCTION]</p>
                     </div>
                 </div>
 
-                <!-- Gallery Item 9: Digital Virus Portrait (1b77cc21) -->
+                <!-- Gallery Item 9: Digital Virus Portrait (1b77cc21) - Restored -->
                 <div class="image-container" onclick="showMessage('VIRUS_CONCEPT_PORTRAIT')">
-                    <img src="Marco_concept_art_of_a_digital_virus_that_infects_peoples_soul__1b77cc21-2012-4ee0-95da-84949432a2ca.png" 
-                         alt="Digital Virus Portrait" class="gallery-image" id="img-9">
-                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                    <img src="Marco_concept_art_of_a_digital_virus_that_infects_peoples_soul__1b77cc21-2012-4ee0-95da-84949432a2ca.jpg" 
+                          alt="Digital Virus Portrait" class="gallery-image" id="img-9"
+                          onerror="this.onerror=null; this.src='https://placehold.co/400x400/064e3b/6ee7b7?text=MISSING_1b77cc21';">
+                    <div class="image-overlay" onmouseover="applyGlitch(this.parentNode.querySelector('.neon-text'))" onmouseout="removeGlitch(this.parentNode.querySelector('.neon-text'))">
                         <p class="neon-text text-lg">[09_THE_HOST_ECHO]</p>
                     </div>
                 </div>
 
-
             </div>
         </section>
 
-        <footer class="text-center mt-10 border-t-4 border-dashed border-white/50 pt-4">
-            <button onclick="closeConnection()" class="p-2 border-2 border-white text-sm hover:bg-white hover:text-black transition">
+        <footer class="text-center mt-8 border-t-4 border-dashed border-white/50 pt-4">
+            <button onclick="closeConnection()" class="p-3 border-2 border-white text-lg neon-red hover:bg-red-900 hover:text-white transition">
                 // CLOSE CONNECTION //
             </button>
         </footer>
@@ -328,10 +365,11 @@
     </div>
 
     <script>
-        // 전역 변수 (ASCENZA 페이지에서 전달받을 수 있도록 준비)
-        let userName = localStorage.getItem('ascenza_user_name') || 'GUEST'; 
+        // Global variables and setup
+        const userName = localStorage.getItem('ascenza_user_name') || 'GUEST'; 
+        let allGlitchTimers = []; // 모든 타이머/인터벌을 저장하여 한 번에 정리
 
-        // 데모용 YouTube 영상 ID 및 제목
+        // Demo YouTube video IDs (These are general, non-monetized content examples)
         const VIDEO_MAP = {
             1: { id: 'NtikAdPnwBg', title: 'ASCENZA: Foundational Doctrine' },
             2: { id: 'Uo0C6J93z_A', title: 'Collective Emergence Timeline' },
@@ -339,72 +377,27 @@
         };
         
         document.addEventListener('DOMContentLoaded', () => {
-             // User name placeholder update
-             const userArchiveSource = document.getElementById('user-archive-source');
-             if (userArchiveSource) {
+            // Update user name placeholder
+            const userArchiveSource = document.getElementById('user-archive-source');
+            if (userArchiveSource) {
                 userArchiveSource.textContent = `SOURCE: NEURAL HANDLE ${userName} / STATUS: LOCAL DATA`;
-             }
+            }
         });
 
-        // Glitch/Chromatic Aberration functions
+        // Glitch/Chromatic Aberration functions (Visual glitch on mouse hover)
         function applyGlitch(element) {
-            element.classList.add('glitch-active');
-            element.classList.add('ambient-shift');
-            
-            // 갤러리 이미지 오버레이 텍스트에도 글리치 적용
-            const textElement = element.querySelector('.neon-text');
-            if(textElement) textElement.classList.add('glitch-active'); 
+            if (element) {
+                element.classList.add('glitch-active');
+            }
         }
 
         function removeGlitch(element) {
-            element.classList.remove('glitch-active');
-            element.classList.remove('ambient-shift');
-            
-            // 갤러리 이미지 오버레이 텍스트의 글리치 제거
-            const textElement = element.querySelector('.neon-text');
-            if(textElement) textElement.classList.remove('glitch-active');
-        }
-
-        // 비디오 임베드 및 재생 함수
-        function loadVideo(index) {
-            const videoData = VIDEO_MAP[index];
-            if (!videoData) return;
-
-            const placeholder = document.getElementById(`video-${index}`);
-            const embedContainer = document.getElementById(`embed-${index}`);
-
-            // 1. 영상 로드 시 플레이스홀더 DIV에서 글리치 효과 제거 (가장 중요)
-            removeGlitch(placeholder);
-            
-            // YouTube 임베드 URL 구성: controls=1로 변경하여 플레이어 컨트롤을 표시합니다.
-            const embedUrl = `https://www.youtube.com/embed/${videoData.id}?autoplay=1&controls=1&rel=0&modestbranding=1`;
-            
-            const iframeHtml = `
-                <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src="${embedUrl}" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                    allowfullscreen>
-                </iframe>
-            `;
-
-            // 플레이스홀더 텍스트 숨기기
-            const placeholderContent = placeholder.querySelectorAll('p');
-            placeholderContent.forEach(p => p.style.display = 'none');
-            
-            // 임베드 컨테이너 표시 및 iframe 주입
-            embedContainer.innerHTML = iframeHtml;
-            embedContainer.style.display = 'block';
-
-            // 비디오가 로드된 후에는 호버 이벤트를 제거하여 오작동 방지
-            placeholder.onmouseover = null;
-            placeholder.onmouseout = null;
-            placeholder.onclick = null;
+            if (element) {
+                element.classList.remove('glitch-active');
+            }
         }
         
-        // 갤러리 이미지 클릭 시 메시지 함수
+        // Gallery image click message function
         function showMessage(code) {
             const messages = {
                 'PYRAMID_CORE_DATA': ">> STATUS: ASCENZA CORE. ETERNAL REFUGE. // ACCESS: DENIED",
@@ -420,50 +413,238 @@
 
             const statusMessage = messages[code] || ">> STATUS: UNKNOWN RECORD. DATA CORRUPTED. // ACCESS: DENIED";
 
-            // 임시 메시지 박스 구현 (alert 대신 사용)
+            // Custom message box (instead of alert/confirm)
             const box = document.createElement('div');
-            box.style.position = 'fixed';
+            box.classList.add('fixed', 'p-4', 'border-2', 'z-50', 'text-center');
             box.style.top = '50%';
             box.style.left = '50%';
             box.style.transform = 'translate(-50%, -50%)';
-            box.style.backgroundColor = 'black';
+            box.style.backgroundColor = 'rgba(0, 0, 0, 0.9)';
             box.style.color = '#FF8080';
-            box.style.border = '2px solid #FF0000';
-            box.style.padding = '20px';
-            box.style.zIndex = '1000';
+            box.style.borderColor = '#FF0000';
             box.style.fontFamily = 'VT323, monospace';
-            box.style.textAlign = 'center';
             box.style.whiteSpace = 'pre-wrap';
             box.textContent = statusMessage;
             
             document.body.appendChild(box);
 
             setTimeout(() => {
-                document.body.removeChild(box);
-            }, 3000); // 3초 후 메시지 제거
+                if (document.body.contains(box)) {
+                    document.body.removeChild(box);
+                }
+            }, 3000); // Remove after 3 seconds
         }
 
-        // --- Connection Close Function (Modified) ---
+        // Video embedding and playback function (Unchanged)
+        function loadVideo(index) {
+            const videoData = VIDEO_MAP[index];
+            if (!videoData) return;
+
+            const placeholder = document.getElementById(`video-${index}`);
+            const embedContainer = document.getElementById(`embed-${index}`);
+
+            removeGlitch(placeholder);
+            
+            const embedUrl = `https://www.youtube.com/embed/${videoData.id}?autoplay=1&controls=1&rel=0&modestbranding=1`;
+            
+            const iframeHtml = `
+                <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src="${embedUrl}" 
+                    title="${videoData.title}"
+                    frameborder="0" 
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                    allowfullscreen>
+                </iframe>
+            `;
+
+            const placeholderContent = placeholder.querySelectorAll('p');
+            placeholderContent.forEach(p => p.style.display = 'none');
+            
+            embedContainer.innerHTML = iframeHtml;
+            embedContainer.style.display = 'block';
+
+            placeholder.onmouseover = null;
+            placeholder.onmouseout = null;
+            placeholder.onclick = null;
+        }
+        
+        // --- Core Glitch Functions for Close Overlay ---
+
+        const availableChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+=-{}[]:;"\'<>,.?/~\\|';
+        function getRandomChar() {
+            return availableChars[Math.floor(Math.random() * availableChars.length)];
+        }
+
+        // 1. 순수한 RGB 채널 시각 효과를 적용/제거하는 함수 (Glitch Burst와 별개로 작동)
+        function applyRgbGlitchStyle(element, isGlitching) {
+            if (isGlitching) {
+                // R/G/B 채널을 랜덤하게 오프셋
+                element.style.textShadow = `
+                    ${Math.random() > 0.5 ? 6 : -6}px 0 0 #ff0000, 
+                    ${Math.random() > 0.5 ? -6 : 6}px 0 0 #00ff00, 
+                    0 ${Math.random() > 0.5 ? 6 : -6}px 0 #0000ff
+                `;
+                element.classList.add('glitch-active'); 
+            } else {
+                // 안정 상태: 흰색 글로우 유지
+                element.style.textShadow = '0 0 10px #ffffff';
+                element.classList.remove('glitch-active');
+            }
+        }
+
+        // 2. RGB 채널 시각 효과를 랜덤하게 깜빡이도록 하는 루프 (상시 작동)
+        function startRgbGlitchLoop(element) {
+            const GLITCH_DURATION = 100; // Shift is short
+            const INTERVAL_MIN = 100; 
+            const INTERVAL_MAX = 400; 
+
+            function triggerRgb() {
+                // 1. Glitch ON
+                applyRgbGlitchStyle(element, true);
+                
+                const timer1 = setTimeout(() => {
+                    // 2. Glitch OFF
+                    applyRgbGlitchStyle(element, false);
+                    scheduleNextRgb();
+                }, GLITCH_DURATION);
+                allGlitchTimers.push(timer1);
+            }
+
+            function scheduleNextRgb() {
+                const delay = Math.random() * (INTERVAL_MAX - INTERVAL_MIN) + INTERVAL_MIN;
+                const timer2 = setTimeout(triggerRgb, delay);
+                allGlitchTimers.push(timer2);
+            }
+            
+            scheduleNextRgb();
+        }
+
+        // 3. 타이핑 및 글자 뒤섞임 효과 (Character Mix)
+        function typeAndGlitch(targetId, finalString, typeSpeed = 80) {
+            const element = document.getElementById(targetId);
+            let index = 0;
+            
+            element.style.opacity = 1;
+
+            const typingInterval = setInterval(() => {
+                if (index < finalString.length) {
+                    // 1. 타이핑 효과
+                    element.textContent = finalString.substring(0, index + 1);
+                    index++;
+
+                    // 2. 타이핑 중 간헐적 글자 뒤섞임 (3% 확률)
+                    if (Math.random() < 0.03 && index > 3 && index < finalString.length - 1) {
+                        
+                        // 글자 뒤섞임 시작: RGB 스타일 적용
+                        applyRgbGlitchStyle(element, true); 
+                        
+                        let glitchText = finalString.substring(0, index);
+                        for (let i = 0; i < 5; i++) {
+                            glitchText += getRandomChar();
+                        }
+                        element.textContent = glitchText.substring(0, finalString.length);
+
+                        // 100ms 후 복원
+                        const timer3 = setTimeout(() => {
+                            element.textContent = finalString.substring(0, index);
+                        }, 100);
+                        allGlitchTimers.push(timer3);
+                    }
+
+                } else {
+                    // 타이핑 완료
+                    clearInterval(typingInterval);
+                    element.textContent = finalString; 
+                    
+                    // 타이핑 완료 후 연속 글자 뒤섞임 루프 시작
+                    startPostGlitchLoop(element, finalString);
+                }
+            }, typeSpeed);
+            allGlitchTimers.push(typingInterval);
+
+            // Cleanup function 
+            return () => {
+                clearInterval(typingInterval);
+            };
+        }
+
+        // 4. 타이핑 완료 후 연속 글자 뒤섞임 효과 (Character Mix)
+        function startPostGlitchLoop(element, finalString) {
+            const GLITCH_DURATION = 150; // 글리치 지속 시간 (ms)
+            const INTERVAL_MIN = 3000; // 최소 간격 (ms)
+            const INTERVAL_MAX = 6000; // 최대 간격 (ms)
+
+            function triggerGlitch() {
+                // 1. Glitch ON (랜덤 캐릭터 믹스 + RGB 스타일)
+                applyRgbGlitchStyle(element, true); 
+                let glitchText = finalString;
+                let charCount = Math.floor(Math.random() * 8) + 3; // 3~10 글자 영향
+                for (let i = 0; i < charCount; i++) {
+                    const randIndex = Math.floor(Math.random() * finalString.length);
+                    glitchText = glitchText.substring(0, randIndex) + getRandomChar() + glitchText.substring(randIndex + 1);
+                }
+                element.textContent = glitchText;
+
+                // 2. Glitch OFF 후 다음 글리치 예약
+                const timer4 = setTimeout(() => {
+                    element.textContent = finalString;
+                    scheduleNextGlitch();
+                }, GLITCH_DURATION);
+                allGlitchTimers.push(timer4);
+            }
+
+            function scheduleNextGlitch() {
+                const delay = Math.random() * (INTERVAL_MAX - INTERVAL_MIN) + INTERVAL_MIN;
+                const timer5 = setTimeout(triggerGlitch, delay);
+                allGlitchTimers.push(timer5);
+            }
+
+            scheduleNextGlitch();
+        }
+
+        // Connection Close Function
         function closeConnection() {
             const overlay = document.getElementById('close-overlay');
             
-            // 메인 콘텐츠 숨기기
-            document.querySelector('.max-w-6xl').style.display = 'none';
+            // 1. 기존 루프 및 타이머 모두 정리
+            allGlitchTimers.forEach(clearTimeout);
+            allGlitchTimers.forEach(clearInterval);
+            allGlitchTimers = [];
 
-            // 오버레이 표시 및 페이드 인 시작
+            // Hide main content
+            const mainContent = document.querySelector('.max-w-6xl');
+            if (mainContent) {
+                mainContent.style.display = 'none';
+            }
+
+            // Show overlay and fade in
             overlay.style.display = 'flex';
             
-            // 50ms 후 active 클래스 추가하여 opacity 0 -> 1로 전환 (CSS transition 2s 적용)
             setTimeout(() => {
                 overlay.classList.add('active');
+                const closeMessageElement = document.getElementById('close-message-text');
+
+                // 2. RGB 채널 분리 상시 루프 시작
+                startRgbGlitchLoop(closeMessageElement);
+
+                // 3. 첫 번째 메시지 타이핑 + 글자 뒤섞임 시작
+                typeAndGlitch('close-message-text', 'ENTRAPPED IN CLAY', 80);
             }, 50); 
             
-            // 5초 후 페이지 종료 (브라우저 정책상 닫힐 수도, 안 닫힐 수도 있음)
+            // 4.5초 후 두 번째 메시지 시작
             setTimeout(() => {
-                // window.close(); 
-                // 캔버스 환경에서 window.close() 대신, 메시지를 남기는 것으로 대체
-                document.querySelector('.close-message').textContent = "ENTRAPPED IN CLAY // TERMINATED";
-            }, 5000); 
+                const closeMessageElement = document.getElementById('close-message-text');
+                
+                // 기존 타이핑 루프(ENTRAPPED IN CLAY) 정리
+                closeMessageElement.style.opacity = 0;
+                
+                setTimeout(() => {
+                    // 두 번째 메시지 타이핑 + 글리치 시작
+                    typeAndGlitch('close-message-text', "CONNECTION TERMINATED // ACCESS REVOKED", 60);
+                }, 100);
+            }, 4500); 
         }
 
     </script>

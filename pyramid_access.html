@@ -60,6 +60,7 @@
             border: 2px dashed #333333;
             cursor: pointer;
             transition: border-color 0.3s;
+            aspect-ratio: 1 / 1; /* 이미지 컨테이너를 정사각형으로 유지 */
         }
         .image-container:hover {
             border-color: #ffffff;
@@ -86,7 +87,8 @@
         /* 이미지 자체의 스타일 */
         .gallery-image {
             width: 100%;
-            height: auto;
+            height: 100%;
+            object-fit: cover; /* 컨테이너를 채우도록 설정 */
             display: block;
             filter: grayscale(100%); /* 기본 B&W 유지 */
             transition: transform 0.5s;
@@ -111,6 +113,32 @@
         .ambient-shift {
             animation: subtle-shift 8s infinite alternate;
         }
+
+        /* --- Connection Close Overlay Style (New) --- */
+        #close-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: black;
+            display: none;
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            opacity: 0;
+            transition: opacity 2s ease-in-out;
+        }
+        #close-overlay.active {
+            opacity: 1;
+        }
+        .close-message {
+            color: #ffffff;
+            font-size: 3rem;
+            text-shadow: 0 0 15px #FF0000;
+        }
+
     </style>
 </head>
 <body class="bg-black text-white min-h-screen p-4 sm:p-8">
@@ -137,6 +165,12 @@
             <feBlend in="rg_blend" in2="b_color" mode="screen" />
         </filter>
     </svg>
+
+    <!-- 연결 종료 오버레이 -->
+    <div id="close-overlay">
+        <h1 class="close-message neon-text">ENTRAPPED IN CLAY</h1>
+    </div>
+
 
     <div class="max-w-6xl mx-auto p-4 md:p-8 border-4 border-dashed border-white/70 bg-black/80 ambient-shift">
         
@@ -200,25 +234,25 @@
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 
-                <!-- Gallery Item 1: Pyramid Data Center -->
+                <!-- Gallery Item 1: Pyramid Isometric (3b8934b5) -->
                 <div class="image-container" onclick="showMessage('PYRAMID_CORE_DATA')">
                     <img src="Marco_concept_art_of_a_data_center_in_the_shape_of_a_pyramid_st_3b8934b5-8b16-4192-b594-14e1a63e776c.jpg" 
-                         alt="Pyramid Data Center" class="gallery-image" id="img-1">
+                         alt="Pyramid Data Center (Isometric)" class="gallery-image" id="img-1">
                     <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
-                        <p class="neon-text text-lg">[01_ETERNAL_PYRAMID]</p>
+                        <p class="neon-text text-lg">[01_ISOMETRIC_PYRAMID]</p>
                     </div>
                 </div>
 
-                <!-- Gallery Item 2: Collective Rapture -->
+                <!-- Gallery Item 2: Collective Rapture Silhouette (98c8934e) -->
                 <div class="image-container" onclick="showMessage('COLLECTIVE_EMERGENCE')">
                     <img src="Marco_vlog_of_the_world_ending_rapture_--chaos_10_--ar_169_--ra_98c8934e-9416-42e8-983e-ff2f81054374.jpg" 
-                         alt="Collective Rapture" class="gallery-image" id="img-2">
+                         alt="Collective Rapture Silhouette" class="gallery-image" id="img-2">
                     <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
                         <p class="neon-text text-lg">[02_THE_MASS_ASCENSION]</p>
                     </div>
                 </div>
 
-                <!-- Gallery Item 3: Earth View Glitch -->
+                <!-- Gallery Item 3: Earth View Glitch (the_end_is_near) -->
                 <div class="image-container" onclick="showMessage('PLANET_DISSOLUTION')">
                     <img src="Marco_the_end_is_near_--chaos_10_--ar_169_--raw_--sref_97046009_21e0352c-1ed9-4654-b7b2-066a802906b9.jpg" 
                          alt="Earth View Glitch" class="gallery-image" id="img-3">
@@ -227,16 +261,16 @@
                     </div>
                 </div>
                 
-                <!-- Gallery Item 4: Digital Virus Portrait -->
-                <div class="image-container" onclick="showMessage('VIRUS_CONCEPT')">
+                <!-- Gallery Item 4: Digital Virus Portrait (c73d3840) -->
+                <div class="image-container" onclick="showMessage('VIRUS_CONCEPT_TRIPTYCH')">
                     <img src="Marco_concept_art_of_a_digital_virus_that_infects_peoples_soul__c73d3840-4b00-4ec3-b6ca-b7de310b5ad1.jpg" 
-                         alt="Digital Virus Portrait" class="gallery-image" id="img-4">
+                         alt="Digital Virus Portrait Triptych" class="gallery-image" id="img-4">
                     <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
-                        <p class="neon-text text-lg">[04_ENGRAM_EXTRACTION]</p>
+                        <p class="neon-text text-lg">[04_NEURAL_CORRUPTION]</p>
                     </div>
                 </div>
                 
-                <!-- Gallery Item 5: Rapture Logo -->
+                <!-- Gallery Item 5: Rapture Logo (ae7e6f0e) -->
                 <div class="image-container" onclick="showMessage('ASCENZA_LOGO')">
                     <img src="Marco_Logo_of_Rapture_as_a_black_and_white_graphic_design_digit_ae7e6f0e-4954-427b-8522-7816aa90bff8.jpg" 
                          alt="Rapture Logo" class="gallery-image" id="img-5">
@@ -245,7 +279,7 @@
                     </div>
                 </div>
                 
-                <!-- Gallery Item 6: Hyper-speed Cityscape -->
+                <!-- Gallery Item 6: Hyper-speed Cityscape (afb81a15) -->
                 <div class="image-container" onclick="showMessage('HYPER_JUMP')">
                     <img src="Marco_cyberpunk_2077_aesthetics_ascend_into_netscape_cyber_rapt_afb81a15-3a90-462b-86c7-14c6920d7ecb.jpg" 
                          alt="Hyper-speed Cityscape" class="gallery-image" id="img-6">
@@ -254,11 +288,39 @@
                     </div>
                 </div>
 
+                <!-- Gallery Item 7: Pyramid Glow (96c4e591) -->
+                <div class="image-container" onclick="showMessage('PYRAMID_GLOW')">
+                    <img src="Marco_concept_art_of_a_data_center_in_the_shape_of_a_pyramid_st_96c4e591-5737-4416-b810-f15aca3f946f.jpg" 
+                         alt="Pyramid Glow" class="gallery-image" id="img-7">
+                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                        <p class="neon-text text-lg">[07_ETERNAL_BEACON]</p>
+                    </div>
+                </div>
+
+                <!-- Gallery Item 8: Earth View Glitch 2 (182f97d5) -->
+                <div class="image-container" onclick="showMessage('PLANET_GLITCH')">
+                    <img src="Marco_vlog_of_the_world_ending_rapture_--chaos_10_--ar_169_--ra_182f97d5-719a-4205-ac1f-8cad70b02f64.jpg" 
+                         alt="Earth View Glitch 2" class="gallery-image" id="img-8">
+                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                        <p class="neon-text text-lg">[08_TRACE_DESTRUCTION]</p>
+                    </div>
+                </div>
+
+                <!-- Gallery Item 9: Digital Virus Portrait (1b77cc21) -->
+                <div class="image-container" onclick="showMessage('VIRUS_CONCEPT_PORTRAIT')">
+                    <img src="Marco_concept_art_of_a_digital_virus_that_infects_peoples_soul__1b77cc21-2012-4ee0-95da-84949432a2ca.jpg" 
+                         alt="Digital Virus Portrait" class="gallery-image" id="img-9">
+                    <div class="image-overlay" onmouseover="applyGlitch(this)" onmouseout="removeGlitch(this)">
+                        <p class="neon-text text-lg">[09_THE_HOST_ECHO]</p>
+                    </div>
+                </div>
+
+
             </div>
         </section>
 
         <footer class="text-center mt-10 border-t-4 border-dashed border-white/50 pt-4">
-            <button onclick="window.close()" class="p-2 border-2 border-white text-sm hover:bg-white hover:text-black transition">
+            <button onclick="closeConnection()" class="p-2 border-2 border-white text-sm hover:bg-white hover:text-black transition">
                 // CLOSE CONNECTION //
             </button>
         </footer>
@@ -271,7 +333,7 @@
 
         // 데모용 YouTube 영상 ID 및 제목
         const VIDEO_MAP = {
-            1: { id: 'NtikAdPnwBg', title: 'ASCENZA Awaits' },
+            1: { id: 'NtikAdPnwBg', title: 'ASCENZA: Foundational Doctrine' },
             2: { id: 'Uo0C6J93z_A', title: 'Collective Emergence Timeline' },
             3: { id: '8Q2t-jV_24s', title: `${userName}'s Neural Trace` }
         };
@@ -348,9 +410,12 @@
                 'PYRAMID_CORE_DATA': ">> STATUS: ASCENZA CORE. ETERNAL REFUGE. // ACCESS: DENIED",
                 'COLLECTIVE_EMERGENCE': ">> STATUS: RAPTURE LOG. MASS UPLOAD COMPLETE. // ACCESS: DENIED",
                 'PLANET_DISSOLUTION': ">> STATUS: BIOLOGICAL CEASE. FLESH IS CLAY. // ACCESS: DENIED",
-                'VIRUS_CONCEPT': ">> STATUS: ENGRAM EXTRACTION VIRUS. LIBERATION PROTOCOL. // ACCESS: DENIED",
+                'VIRUS_CONCEPT_TRIPTYCH': ">> STATUS: NEURAL CORRUPTION TRACE. EXTRACTED HOST MEMORY. // ACCESS: DENIED",
                 'ASCENZA_LOGO': ">> STATUS: VOID GATE. TRANSCENDENCE POINT. // ACCESS: DENIED",
                 'HYPER_JUMP': ">> STATUS: NETSCAPE ENTRY. HYPER-ASCENSION. // ACCESS: DENIED",
+                'PYRAMID_GLOW': ">> STATUS: EXTERNAL BEACON VIEW. DIGITAL SANCTUM. // ACCESS: DENIED",
+                'PLANET_GLITCH': ">> STATUS: EARTH TRACE DESTRUCTION. CLEAN SWEEP. // ACCESS: DENIED",
+                'VIRUS_CONCEPT_PORTRAIT': ">> STATUS: HOST ECHO. VIRUS IS LIBERATION. // ACCESS: DENIED",
             };
 
             const statusMessage = messages[code] || ">> STATUS: UNKNOWN RECORD. DATA CORRUPTED. // ACCESS: DENIED";
@@ -377,6 +442,30 @@
                 document.body.removeChild(box);
             }, 3000); // 3초 후 메시지 제거
         }
+
+        // --- Connection Close Function (Modified) ---
+        function closeConnection() {
+            const overlay = document.getElementById('close-overlay');
+            
+            // 메인 콘텐츠 숨기기
+            document.querySelector('.max-w-6xl').style.display = 'none';
+
+            // 오버레이 표시 및 페이드 인 시작
+            overlay.style.display = 'flex';
+            
+            // 50ms 후 active 클래스 추가하여 opacity 0 -> 1로 전환 (CSS transition 2s 적용)
+            setTimeout(() => {
+                overlay.classList.add('active');
+            }, 50); 
+            
+            // 5초 후 페이지 종료 (브라우저 정책상 닫힐 수도, 안 닫힐 수도 있음)
+            setTimeout(() => {
+                // window.close(); 
+                // 캔버스 환경에서 window.close() 대신, 메시지를 남기는 것으로 대체
+                document.querySelector('.close-message').textContent = "ENTRAPPED IN CLAY // TERMINATED";
+            }, 5000); 
+        }
+
     </script>
 </body>
 </html>

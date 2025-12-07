@@ -35,6 +35,11 @@
             text-shadow: 0 0 4px #00ff00, 0 0 10px #00ff00;
             color: #00ff00;
         }
+        /* 최종 단계용 골드/앰버 네온 */
+        .neon-gold {
+            color: #fbbf24;
+            text-shadow: 0 0 4px #fbbf24, 0 0 10px #b45309;
+        }
 
         /* --- Ambient Shift & Pulse Animations --- */
         /* 테두리 펄스 효과 */
@@ -352,7 +357,7 @@
                 </div>
 
                 <div class="image-container" onclick="showMessage('PLANET_DISSOLUTION', 3)">
-                    <img src="Marco_the_end_is_near_--chaos_10_--ar_169_--raw_--sref_97046009_21e0352c-1ed9-4654-b7b2-066a802906b9.png" alt="Img 3" class="gallery-image" id="img-3" onerror="this.onerror=null; this.src='https://placehold.co/400x400/991b1b/fca5a5?text=MISSING_IMG';">
+                    <img src="Marco_the_end_is_near_--chaos_10_--ar_169_--ra_182f97d5-719a-4205-ac1f-8cad70b02f64.png" alt="Img 3" class="gallery-image" id="img-3" onerror="this.onerror=null; this.src='https://placehold.co/400x400/991b1b/fca5a5?text=MISSING_IMG';">
                     <div class="image-overlay" onmouseover="applyGlitch(this.parentNode.querySelector('.neon-text'))" onmouseout="removeGlitch(this.parentNode.querySelector('.neon-text'))">
                         <p class="neon-text text-lg">[03_WORLD_EXIT_PROTOCOL]</p>
                     </div>
@@ -405,7 +410,7 @@
             </div>
         </section>
 
-        <footer class="text-center mt-8 border-t-4 border-dashed border-white/50 pt-4">
+        <footer class="text-center mt-8 border-t-4 border-dashed border-white/50 pt-4 mb-16">
             <button onclick="closeConnection()" class="p-3 border-2 border-white text-lg neon-white hover:bg-gray-900 hover:text-white transition">
                 // CLOSE CONNECTION //
             </button>
@@ -413,26 +418,35 @@
 
     </div>
 
+    <!-- Right Bottom Manifesto Link (Added) -->
+    <a href="about.html" class="fixed bottom-6 right-6 z-40 text-xs font-mono text-gray-600 hover:text-white transition-colors tracking-widest">
+        [ VIEW_MANIFESTO_LOG ]
+    </a>
+
     <script>
         // Global variables and setup
         const userName = localStorage.getItem('ascenza_user_name') || 'GUEST'; 
         let allGlitchTimers = []; 
-        let accessLevel = 0; // 0: Level 0, 1: Level 1, 2: Level 2
+        let accessLevel = 0; // 0: Level 0, 1: Level 1, 2: Level 2, 3: Welcome
 
         const VIDEO_MAP = {
             1: { id: 'NtikAdPnwBg', title: 'ASCENZA Awaits' },
-            2: { id: 'EWYRLjBYMY8', title: 'Enter the Pyramid' },
-            3: { id: '8Q2t-jV_24s', title: `${userName}'s Neural Trace` }
+            2: { id: 'EWYRLjBYMY8', title: 'Collective Emergence Timeline' },
+            3: { id: 'bwL_p-ixLTA', title: `${userName} Inside the Pyramid` }
         };
 
         const SECRET_LORE = {
-            1: ">> HIDDEN DATA: The Central core of the Immortal Pyramid, refuge for all of humanity.",
-            2: ">> HIDDEN DATA: One cannot defy the Collective Emergence. No one can resist.",
-            3: ">> HIDDEN DATA: The eyes... they follow the cursor. Even when the screen is off, I feel them watching us. Watching all of us.",
+            1: ">> HIDDEN DATA: They found the statue first. It wasn't built; it was unearthed from a layer of reality that shouldn't exist.",
+            2: ">> HIDDEN DATA: It was warm to the touch. The stone pulsed with a heartbeat not of this world.",
+            3: ">> HIDDEN DATA: The eyes... they follow the cursor. Even when the screen is off, I feel them watching.",
             // Lore for Level 2
             4: ">> HIDDEN DATA: The virus wasn't a malfunction. It was an invitation. The mind fragments before the body decays.",
-            5: ">> HIDDEN DATA: The Void Gate... There is no return. Only through. We left our names at the entrance. The Engram Extraction Virus.",
-            6: ">> HIDDEN DATA: Speed is irrelevant where we are going. We are not moving through space, but through memory."
+            5: ">> HIDDEN DATA: The Void Gate... There is no return. Only through. We left our names at the entrance.",
+            6: ">> HIDDEN DATA: Speed is irrelevant where we are going. We are not moving through space, but through memory.",
+            // Lore for Level 3 (Final)
+            7: ">> HIDDEN DATA: The beacon is lit. It is not a signal for help, but a warning. We are leaving.",
+            8: ">> HIDDEN DATA: Let the world dissolve. The pixel is eternal; the atom is dust. We choose the pixel.",
+            9: ">> HIDDEN DATA: I am no longer one. I am we. The emergence is complete."
         };
         
         document.addEventListener('DOMContentLoaded', () => {
@@ -510,9 +524,23 @@
                     feedback.className = "text-xs h-4 text-center tracking-widest text-gray-500";
                 }
             }
+            // LEVEL 2 -> LEVEL 3 (FINAL)
+            else if (accessLevel === 2) {
+                if (cleanCode === 'collective emergence') {
+                    unlockFinalLevel();
+                    feedback.textContent = ">> CRITICAL: SINGULARITY ACHIEVED. WELCOME.";
+                    feedback.className = "text-xs h-4 text-center tracking-widest text-green-400 neon-green";
+                } else if (cleanCode === 'enter the pyramid') {
+                    feedback.textContent = ">> CODE ALREADY REDEEMED.";
+                    feedback.className = "text-xs h-4 text-center tracking-widest text-gray-400";
+                } else {
+                    feedback.textContent = ">> ERROR: INVALID CREDENTIALS. ACCESS DENIED.";
+                    feedback.className = "text-xs h-4 text-center tracking-widest text-gray-500";
+                }
+            }
             // MAX LEVEL
-            else if (accessLevel >= 2) {
-                feedback.textContent = ">> SYSTEM UNLOCKED. AWAITING FURTHER PROTOCOLS.";
+            else if (accessLevel >= 3) {
+                feedback.textContent = ">> SYSTEM UNLOCKED. WE ARE WAITING.";
                 feedback.className = "text-xs h-4 text-center tracking-widest text-white neon-white";
             }
         }
@@ -549,7 +577,7 @@
             accessLevel = 2;
             triggerLevelUpSequence("MAXIMUM CLEARANCE: LEVEL 2");
 
-            document.getElementById('clearance-level').textContent = "CLEARANCE: LEVEL 2 (MAX)";
+            document.getElementById('clearance-level').textContent = "CLEARANCE: LEVEL 2";
             document.getElementById('clearance-level').className = "text-white neon-white"; 
 
             const hintElement = document.getElementById('current-hint');
@@ -574,6 +602,36 @@
             document.getElementById('v2-action').className = "text-xs mt-2 text-white neon-white";
         }
 
+        function unlockFinalLevel() {
+            accessLevel = 3;
+            triggerLevelUpSequence("IDENTITY INTEGRATION COMPLETE");
+
+            // Change Header Status
+            document.getElementById('clearance-level').textContent = "STATUS: WELCOME";
+            document.getElementById('clearance-level').className = "text-yellow-400 neon-gold font-bold"; 
+
+            // Hide Hint
+            const hintElement = document.getElementById('current-hint');
+            if (hintElement) {
+                hintElement.style.display = 'none'; // Completely remove hint
+            }
+
+            // Unlock Video 3 (Final Reward)
+            const vid3 = document.getElementById('video-3');
+            vid3.classList.remove('video-locked');
+            vid3.onmouseover = function() { applyGlitch(this); };
+            vid3.onmouseout = function() { removeGlitch(this); };
+
+            document.getElementById('v3-title').textContent = `[03_${userName.toUpperCase()}_NEURAL_ARCHIVE]`;
+            document.getElementById('v3-title').className = "mb-2 neon-text";
+
+            document.getElementById('v3-status').textContent = "SOURCE: CORE / STATUS: RESTORED";
+            document.getElementById('v3-status').className = "text-sm text-gray-400";
+
+            document.getElementById('v3-action').textContent = "CLICK TO INITIATE PLAYBACK";
+            document.getElementById('v3-action').className = "text-xs mt-2 text-white neon-white";
+        }
+
         // --- Existing Functions ---
 
         function applyGlitch(element) {
@@ -594,7 +652,6 @@
             let isSecret = false;
 
             // CHECK LORE CONDITIONS
-            
             // Level 0+ (Always visible for 1-3)
             if (accessLevel >= 0 && (index >= 1 && index <= 3)) {
                 messageText = SECRET_LORE[index];
@@ -602,6 +659,11 @@
             }
             // Level 2+ (Visible for 4-6)
             else if (accessLevel >= 2 && (index >= 4 && index <= 6)) {
+                messageText = SECRET_LORE[index];
+                isSecret = true;
+            }
+            // Level 3 (Visible for 7-9)
+            else if (accessLevel >= 3 && (index >= 7 && index <= 9)) {
                 messageText = SECRET_LORE[index];
                 isSecret = true;
             }
@@ -656,7 +718,7 @@
             // Updated Guard Clauses
             if (index === 1 && accessLevel < 1) return; // Locked until Level 1
             if (index === 2 && accessLevel < 2) return; // Locked until Level 2
-            if (index === 3) return; // Locked (Awaiting code)
+            if (index === 3 && accessLevel < 3) return; // Locked until Level 3
 
             const videoData = VIDEO_MAP[index];
             if (!videoData) return;
